@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_test_pilot/src/nav/global_nav.dart';
+ final aliceNavigatorKey = GlobalKey<NavigatorState>();
 void main() {
   runApp(MyApp());
 }
@@ -7,45 +8,20 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    TestPilotNavigator.useExistingKey(aliceNavigatorKey);
     return MaterialApp(
+
       title: 'Test Pilot Demo App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: HomePage(),
-      navigatorKey: TestPilotNavigator.navigatorKey,
+      navigatorKey: aliceNavigatorKey,
     );
   }
 }
 
-// Custom Navigation System (Similar to Patrol)
-class TestPilotNavigator {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  static BuildContext get context => navigatorKey.currentContext!;
-  static NavigatorState get navigator => navigatorKey.currentState!;
-
-  // Navigation methods that can be controlled by tests
-  static Future<void> pushTo(String routeName, {Object? arguments}) async {
-    await navigator.pushNamed(routeName, arguments: arguments);
-  }
-
-  static void pop() {
-    navigator.pop();
-  }
-
-  static Future<void> pushAndReplace(String routeName, {Object? arguments}) async {
-    await navigator.pushReplacementNamed(routeName, arguments: arguments);
-  }
-
-  // Test-friendly navigation with delays for verification
-  static Future<void> navigateAndWait(String routeName, {Duration? delay}) async {
-    await pushTo(routeName);
-    if (delay != null) {
-      await Future.delayed(delay);
-    }
-  }
-}
 
 // Global variable tracker for the plugin
 class GuardianGlobal {
