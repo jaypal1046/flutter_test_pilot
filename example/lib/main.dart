@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Test Pilot Demo App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: HomePage(),
+   
       navigatorKey: aliceNavigatorKey,
       routes: AppRoutes.routes,
     );
