@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../../step_result.dart';
-import '../../test_action.dart';
+import '../../../step_result.dart';
+import '../../../test_action.dart';
 
 /// Pinch gesture for zoom operations
 class Pinch extends TestAction {

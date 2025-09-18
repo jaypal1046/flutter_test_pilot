@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../../step_result.dart';
-import '../../test_action.dart';
+import '../../../step_result.dart';
+import '../../../test_action.dart';
 
 /// Drag and drop gestures for testing
 class Drag extends TestAction {
