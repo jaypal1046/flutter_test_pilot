@@ -78,12 +78,13 @@ class Type extends TestAction {
       () => _findBySize(tester, identifier),
       () => _findByWidgetIndex(tester, identifier),
       () => _findByTestSemantics(tester, identifier),
-      // () => _findByParentProperties(tester, identifier),
+      () => _findByParentProperties(tester, identifier),
       () => _findByChildProperties(tester, identifier),
       () => _findByControllerProperties(tester, identifier),
-      // () => _findByFocusNodeProperties(tester, identifier),
+      () => _findByFocusNodeProperties(tester, identifier),
       () => _findByCustomProperties(tester, identifier),
       () => _findByWidgetTree(tester, identifier),
+      () => _findFocusNodeThroughElements(tester, identifier),
     ];
 
     for (final strategy in strategies) {
@@ -313,26 +314,37 @@ class Type extends TestAction {
     return find.byWidgetPredicate((widget) => false);
   }
 
-  // /// Strategy 11: Find by parent widget properties
-  // Finder _findByParentProperties(WidgetTester tester, String identifier) {
-  //   if (identifier.startsWith('parent:')) {
-  //     final parentInfo = identifier.substring(7);
-      
-  //     return find.byWidgetPredicate((widget) {
-  //       if (widget is TextField || widget is TextFormField) {
-  //         try {
-  //           final element = tester.element(find.byWidget(widget));
-  //           final parent = element.parent;
-  //           return parent?.widget.toString().contains(parentInfo) ?? false;
-  //         } catch (e) {
-  //           return false;
-  //         }
-  //       }
-  //       return false;
-  //     });
-  //   }
-  //   return find.byWidgetPredicate((widget) => false);
-  // }
+  /// Strategy 11: Find by parent widget properties
+/// Alternative Fix 4: Using visitAncestorElements for safer traversal
+Finder _findByParentProperties(WidgetTester tester, String identifier) {
+  if (identifier.startsWith('parent:')) {
+    final parentInfo = identifier.substring(7);
+    
+    return find.byWidgetPredicate((widget) {
+      if (widget is TextField || widget is TextFormField) {
+        try {
+          final element = tester.element(find.byWidget(widget));
+          bool found = false;
+          
+          element.visitAncestorElements((ancestor) {
+            if (ancestor.widget.toString().contains(parentInfo)) {
+              found = true;
+              return false; // Stop traversal
+            }
+            return true; // Continue traversal
+          });
+          
+          return found;
+          
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    });
+  }
+  return find.byWidgetPredicate((widget) => false);
+}
 
   /// Strategy 12: Find by child properties
   Finder _findByChildProperties(WidgetTester tester, String identifier) {
@@ -363,22 +375,213 @@ class Type extends TestAction {
     return find.byWidgetPredicate((widget) => false);
   }
 
-  // /// Strategy 14: Find by focus node properties
-  // Finder _findByFocusNodeProperties(WidgetTester tester, String identifier) {
-  //   if (identifier.startsWith('focus:')) {
-  //     final focusInfo = identifier.substring(6);
-  //     return find.byWidgetPredicate((widget) {
-  //       if (widget is TextField) {
-  //         return widget.focusNode?.debugLabel?.contains(focusInfo) ?? false;
-  //       } else if (widget is TextFormField) {
-  //         return widget.focusNode?.debugLabel?.contains(focusInfo) ?? false;
-  //       }
-  //       return false;
-  //     });
-  //   }
-  //   return find.byWidgetPredicate((widget) => false);
-  // }
+
+
+  /// Strategy 14: Enhanced Focus Node Finding (Corrected)
+/// This approach properly handles different widget types and their actual properties
+Finder _findByFocusNodeProperties(WidgetTester tester, String identifier) {
+  if (identifier.startsWith('focus:')) {
+    final focusInfo = identifier.substring(6);
+    
+    // Strategy 1: Find TextField with correct focus node property
+    final textFieldFinder = find.byWidgetPredicate((widget) {
+      if (widget is TextField && widget.focusNode != null) {
+        return widget.focusNode!.debugLabel?.contains(focusInfo) ?? false;
+      }
+      return false;
+    });
+    
+    if (tester.any(textFieldFinder)) {
+      return textFieldFinder;
+    }
+    
+    // Strategy 2: Find TextFormField (access focus node through FormField)
+    final textFormFieldFinder = find.byWidgetPredicate((widget) {
+      if (widget is TextFormField) {
+        try {
+          // TextFormField extends FormField<String>
+          // We need to check if it has a focus node through its decoration or other means
+          final dynamic formField = widget;
+          
+          // Try to access focus node through reflection/dynamic access
+          if (formField.focusNode != null) {
+            return formField.focusNode.debugLabel?.contains(focusInfo) ?? false;
+          }
+        } catch (e) {
+          // If direct access fails, widget might not have focus node set
+        }
+      }
+      return false;
+    });
+    
+    if (tester.any(textFormFieldFinder)) {
+      return textFormFieldFinder;
+    }
+    
+    // Strategy 3: Find Focus widgets that wrap text fields
+    final focusWrapperFinder = find.byWidgetPredicate((widget) {
+      if (widget is Focus && widget.focusNode != null) {
+        return widget.focusNode!.debugLabel?.contains(focusInfo) ?? false;
+      }
+      return false;
+    });
+    
+    if (tester.any(focusWrapperFinder)) {
+      // Look for text fields inside Focus widgets
+      final wrappedTextFieldFinder = find.descendant(
+        of: focusWrapperFinder,
+        matching: find.byWidgetPredicate((widget) => 
+          widget is TextField || widget is TextFormField),
+      );
+      
+      if (tester.any(wrappedTextFieldFinder)) {
+        return wrappedTextFieldFinder;
+      }
+    }
+    
+    // Strategy 4: Find FocusScope with correct property name
+    final focusScopeFinder = find.byWidgetPredicate((widget) {
+      if (widget is FocusScope && widget.focusNode != null) {
+        return widget.focusNode!.debugLabel?.contains(focusInfo) ?? false;
+      }
+      return false;
+    });
+    
+    if (tester.any(focusScopeFinder)) {
+      final scopedTextFieldFinder = find.descendant(
+        of: focusScopeFinder,
+        matching: find.byWidgetPredicate((widget) => 
+          widget is TextField || widget is TextFormField),
+      );
+      
+      if (tester.any(scopedTextFieldFinder)) {
+        return scopedTextFieldFinder;
+      }
+    }
+    
+    // Strategy 5: Global focus node search through widget tree
+    final globalFocusNodeFinder = _findFocusNodeGlobally(tester, focusInfo);
+    if (tester.any(globalFocusNodeFinder)) {
+      return globalFocusNodeFinder;
+    }
+  }
   
+  return find.byWidgetPredicate((widget) => false);
+}
+
+/// Global search for focus nodes by traversing the entire widget tree
+Finder _findFocusNodeGlobally(WidgetTester tester, String focusInfo) {
+  final Map<FocusNode, List<Widget>> focusNodeToTextFields = {};
+  
+  try {
+    // Step 1: Collect all widgets in the current tree
+    final allWidgets = <Widget>[];
+    final rootElement = tester.binding.rootElement;
+    
+    if (rootElement != null) {
+      _collectAllWidgets(rootElement, allWidgets);
+    }
+    
+    // Step 2: Build mapping of focus nodes to text fields
+    for (final widget in allWidgets) {
+      if (widget is TextField && widget.focusNode != null) {
+        focusNodeToTextFields.putIfAbsent(widget.focusNode!, () => []).add(widget);
+      } else if (widget is Focus && widget.focusNode != null) {
+        // Find any text fields that might be children of this Focus
+        final textFields = _findTextFieldsInWidget(tester, widget);
+        if (textFields.isNotEmpty) {
+          focusNodeToTextFields.putIfAbsent(widget.focusNode!, () => []).addAll(textFields);
+        }
+      }
+    }
+    
+    // Step 3: Find matching focus node and return associated text field
+    for (final entry in focusNodeToTextFields.entries) {
+      final focusNode = entry.key;
+      final textFields = entry.value;
+      
+      if (focusNode.debugLabel?.contains(focusInfo) ?? false) {
+        // Return the first text field associated with this focus node
+        if (textFields.isNotEmpty) {
+          return find.byWidget(textFields.first);
+        }
+      }
+    }
+  } catch (e) {
+    // Handle any errors during tree traversal
+  }
+  
+  return find.byWidgetPredicate((widget) => false);
+}
+
+/// Recursively collect all widgets in the tree
+void _collectAllWidgets(Element element, List<Widget> widgets) {
+  try {
+    widgets.add(element.widget);
+    element.visitChildren((child) {
+      _collectAllWidgets(child, widgets);
+    });
+  } catch (e) {
+    // Handle traversal errors
+  }
+}
+
+/// Find text fields that are children of a given widget
+List<Widget> _findTextFieldsInWidget(WidgetTester tester, Widget parentWidget) {
+  final textFields = <Widget>[];
+  
+  try {
+    final descendantFinder = find.descendant(
+      of: find.byWidget(parentWidget),
+      matching: find.byWidgetPredicate((widget) => 
+        widget is TextField || widget is TextFormField),
+    );
+    
+    if (tester.any(descendantFinder)) {
+      textFields.addAll(tester.widgetList(descendantFinder));
+    }
+  } catch (e) {
+    // Handle finder errors
+  }
+  
+  return textFields;
+}
+
+
+
+/// Strategy for finding focus nodes through Element inspection
+/// This bypasses widget property limitations by examining the element tree
+Finder _findFocusNodeThroughElements(WidgetTester tester, String focusInfo) {
+  return find.byWidgetPredicate((widget) {
+    try {
+      final element = tester.element(find.byWidget(widget));
+      
+      // Check if this element has focus-related render objects
+      final renderObject = element.renderObject;
+      if (renderObject != null) {
+        final renderString = renderObject.toString();
+        if (renderString.contains(focusInfo) && 
+            (renderString.contains('Focus') || renderString.contains('Editable'))) {
+          
+          // Verify this is actually a text field
+          return widget is TextField || widget is TextFormField;
+        }
+      }
+      
+      // Check element properties
+      final elementString = element.toString();
+      if (elementString.contains(focusInfo) && elementString.contains('Focus')) {
+        return widget is TextField || widget is TextFormField;
+      }
+      
+    } catch (e) {
+      // Handle element access errors
+    }
+    
+    return false;
+  });
+}
+
 
   /// Strategy 15: Find by custom widget properties
   Finder _findByCustomProperties(WidgetTester tester, String identifier) {
