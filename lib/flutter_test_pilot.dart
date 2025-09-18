@@ -8,8 +8,8 @@ export 'package:flutter_test_pilot/src/test_suite/test_result.dart';
 export 'package:flutter_test_pilot/src/test_suite/test_status.dart';
 export 'package:flutter_test_pilot/src/test_suite/test_suite.dart';
 export 'package:flutter_test_pilot/src/test_suite/nav_action/navgator.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/tap.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/type.dart';
+export 'package:flutter_test_pilot/src/test_suite/ui_interaction/tap/tap.dart';
+export 'package:flutter_test_pilot/src/test_suite/ui_interaction/type/type.dart';
 
 
 import 'package:flutter/material.dart';
@@ -37,8 +37,8 @@ class FlutterTestPilot {
   /// Initialize Test Pilot with navigator key
   static void initialize(GlobalKey<NavigatorState> navigatorKey  ) {
 
-    _navigatorKey = TestPilotNavigator.navigatorKey!;
-    print('🚀 Test Pilot initialized with navigator key');
+    _navigatorKey = TestPilotNavigator.navigatorKey;
+    debugPrint('🚀 Test Pilot initialized with navigator key');
   }
 
   /// Get current navigator key
@@ -60,7 +60,7 @@ class FlutterTestPilot {
       );
     }
 
-    print('🧪 Running test suite: ${suite.name}');
+    debugPrint('🧪 Running test suite: ${suite.name}');
     final result = await suite.execute(_currentTester!);
     _printTestResult(result);
     return result;
@@ -74,7 +74,7 @@ class FlutterTestPilot {
       );
     }
 
-    print('📋 Running test group: ${group.name}');
+    debugPrint('📋 Running test group: ${group.name}');
     final results = <TestResult>[];
 
     for (final suite in group.suites) {
@@ -85,11 +85,11 @@ class FlutterTestPilot {
 
         // Stop on first failure if configured
         if (group.stopOnFailure && !result.status.isPassed) {
-          print('⚠️ Stopping group execution due to failure');
+          debugPrint('⚠️ Stopping group execution due to failure');
           break;
         }
       } catch (e) {
-        print('❌ Fatal error in suite ${suite.name}: $e');
+        debugPrint('❌ Fatal error in suite ${suite.name}: $e');
         break;
       }
     }
@@ -103,14 +103,14 @@ class FlutterTestPilot {
     final status = result.status.isPassed ? '✅' : '❌';
     final duration = result.totalDuration.inMilliseconds;
 
-    print('$status ${result.suiteName} - ${duration}ms');
+    debugPrint('$status ${result.suiteName} - ${duration}ms');
 
     if (result.error != null) {
-      print('   Error: ${result.error}');
+      debugPrint('   Error: ${result.error}');
     }
 
     if (result.cleanupError != null) {
-      print('   Cleanup Error: ${result.cleanupError}');
+      debugPrint('   Cleanup Error: ${result.cleanupError}');
     }
   }
 
@@ -123,11 +123,11 @@ class FlutterTestPilot {
       (sum, result) => sum + result.totalDuration,
     );
 
-    print('\n📊 Group Summary: ${group.name}');
-    print('   Total: ${results.length}');
-    print('   ✅ Passed: $passed');
-    print('   ❌ Failed: $failed');
-    print('   ⏱️ Duration: ${totalDuration.inMilliseconds}ms\n');
+    debugPrint('\n📊 Group Summary: ${group.name}');
+    debugPrint('   Total: ${results.length}');
+    debugPrint('   ✅ Passed: $passed');
+    debugPrint('   ❌ Failed: $failed');
+    debugPrint('   ⏱️ Duration: ${totalDuration.inMilliseconds}ms\n');
   }
 }
 

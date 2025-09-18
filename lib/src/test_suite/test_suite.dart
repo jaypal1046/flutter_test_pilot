@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 
-import 'step_result.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'test_action.dart';
 import 'test_result.dart';
 import 'test_status.dart';

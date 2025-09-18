@@ -1,9 +1,7 @@
 // test_pilot_runner.dart - Helper functions for running tests in test files
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../flutter_test_pilot.dart';
-import 'test_suite/test_suite.dart';
 class TestPilotRunner {
   /// Helper to run a single suite within a testWidgets
   static Future<void> runSuite(

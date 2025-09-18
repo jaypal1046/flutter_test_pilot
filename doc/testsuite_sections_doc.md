@@ -73,6 +73,27 @@ This document outlines all the major sections and components that make up the Fl
 - **Toggle.switch()** - Switch toggle
 - **Slider.setValue()** - Slider value setting
 
+### Dropdown Interactions
+- **Dropdown.open(identifier)** - Open dropdown menu
+- **Dropdown.select(option)** - Select option from dropdown
+- **Dropdown.searchAndSelect(query)** - Search and select option
+- **Dropdown.close()** - Close dropdown menu
+
+### Switch Interactions
+- **Switch.toggle(identifier)** - Toggle switch widget
+- **Switch.setOn(identifier)** - Set switch to ON state
+- **Switch.setOff(identifier)** - Set switch to OFF state
+- **Switch.isOn(identifier)** - Assert switch is ON
+- **Switch.isOff(identifier)** - Assert switch is OFF
+
+### Media Interactions
+- **Media.play(audio/video)** - Play media files
+- **Media.pause(audio/video)** - Pause media playback
+- **Media.stop(audio/video)** - Stop media playback
+- **Media.seek(audio/video, position)** - Seek to position in media
+
+> Note: Animation and clipboard actions are typically triggered as part of other UI interactions (e.g., tapping a widget may start an animation, or copying text may occur after a selection). Custom widget actions can also be performed through direct interaction or method invocation within test steps.
+
 ---
 
 ## 4. WAIT ACTIONS
