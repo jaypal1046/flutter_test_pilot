@@ -28,6 +28,8 @@ class ApiCallData {
     required this.duration,
   });
 
-  bool get isSuccess => statusCode != null && statusCode! >= 200 && statusCode! < 300;
-  bool get isError => statusCode == null || statusCode! >= 400 || errorMessage != null;
+  bool get isSuccess =>
+      statusCode != null && statusCode! >= 200 && statusCode! < 300;
+  bool get isError =>
+      statusCode == null || statusCode! >= 400 || errorMessage != null;
 }
