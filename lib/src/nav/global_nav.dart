@@ -11,7 +11,7 @@ class TestPilotNavigator {
   static void useExistingKey(GlobalKey<NavigatorState> existingKey) {
     _activeKey = existingKey;
     _isConfigured = true;
-    print('✅ Test Pilot: Using existing navigator key');
+    debugPrint('✅ Test Pilot: Using existing navigator key');
   }
 
   /// Use this for new apps or when you want Test Pilot to manage navigation
@@ -19,7 +19,7 @@ class TestPilotNavigator {
     if (!_isConfigured) {
       _activeKey = _defaultKey;
       _isConfigured = true;
-      print('✅ Test Pilot: Using own navigator key');
+      debugPrint('✅ Test Pilot: Using own navigator key');
     }
     return _defaultKey;
   }

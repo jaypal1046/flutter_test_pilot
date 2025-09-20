@@ -6,7 +6,7 @@ import '../../../step_result.dart';
 import '../../../test_action.dart';
 
 /// Drag and drop gestures for testing
-class Drag extends TestAction {
+class DragDrop extends TestAction {
   final String? fromText;
   final String? fromKey;
   final Type? fromType;
@@ -17,10 +17,10 @@ class Drag extends TestAction {
   final Offset? toPoint;
   final Offset? byOffset;
   final Duration duration;
-  final DragContext? context;
+  final DragDropContext? context;
   final bool waitForLongPress;
 
-  const Drag._({
+  const DragDrop._({
     this.fromText,
     this.fromKey,
     this.fromType,
@@ -35,8 +35,8 @@ class Drag extends TestAction {
     this.waitForLongPress = false,
   });
 
-  /// Drag from one widget to another by text
-  factory Drag.fromTo({
+  /// DragDrop from one widget to another by text
+  factory DragDrop.fromTo({
     String? fromText,
     String? fromKey,
     Type? fromType,
@@ -46,7 +46,7 @@ class Drag extends TestAction {
     Duration? duration,
     bool waitForLongPress = false,
   }) {
-    return Drag._(
+    return DragDrop._(
       fromText: fromText,
       fromKey: fromKey,
       fromType: fromType,
@@ -58,8 +58,8 @@ class Drag extends TestAction {
     );
   }
 
-  /// Drag widget by offset
-  factory Drag.byOffset({
+  /// DragDrop widget by offset
+  factory DragDrop.byOffset({
     String? fromText,
     String? fromKey,
     Type? fromType,
@@ -67,7 +67,7 @@ class Drag extends TestAction {
     Duration? duration,
     bool waitForLongPress = false,
   }) {
-    return Drag._(
+    return DragDrop._(
       fromText: fromText,
       fromKey: fromKey,
       fromType: fromType,
@@ -78,13 +78,13 @@ class Drag extends TestAction {
   }
 
   /// Drag from point to point (screen coordinates)
-  factory Drag.fromPointToPoint({
+  factory DragDrop.fromPointToPoint({
     required Offset from,
     required Offset to,
     Duration? duration,
     bool waitForLongPress = false,
   }) {
-    return Drag._(
+    return DragDrop._(
       fromPoint: from,
       toPoint: to,
       duration: duration ?? const Duration(milliseconds: 600),
@@ -92,17 +92,17 @@ class Drag extends TestAction {
     );
   }
 
-  /// Drag and drop for reordering (like in ReorderableListView)
-  factory Drag.toReorder({
+  /// DragDrop and drop for reordering (like in ReorderableListView)
+  factory DragDrop.toReorder({
     required String itemText,
     required int fromIndex,
     required int toIndex,
     Duration? duration,
   }) {
-    return Drag._(
+    return DragDrop._(
       fromText: itemText,
       duration: duration ?? const Duration(milliseconds: 600),
-      context: DragContext._(
+      context: DragDropContext._(
         isReorder: true,
         fromIndex: fromIndex,
         toIndex: toIndex,
@@ -111,29 +111,26 @@ class Drag extends TestAction {
     );
   }
 
-  /// Drag to specific position (like slider)
-  factory Drag.toPosition({
+  /// DragDrop to specific position (like slider)
+  factory DragDrop.toPosition({
     String? sliderText,
     String? sliderKey,
     Type? sliderType,
     required double position, // 0.0 to 1.0
     Duration? duration,
   }) {
-    return Drag._(
+    return DragDrop._(
       fromText: sliderText,
       fromKey: sliderKey,
       fromType: sliderType,
       duration: duration ?? const Duration(milliseconds: 600),
-      context: DragContext._(
-        isSlider: true,
-        targetPosition: position,
-      ),
+      context: DragDropContext._(isSlider: true, targetPosition: position),
     );
   }
 
   /// Add context for disambiguation
-  Drag withContext(String description) {
-    return Drag._(
+  DragDrop withContext(String description) {
+    return DragDrop._(
       fromText: fromText,
       fromKey: fromKey,
       fromType: fromType,
@@ -145,7 +142,7 @@ class Drag extends TestAction {
       byOffset: byOffset,
       duration: duration,
       waitForLongPress: waitForLongPress,
-      context: DragContext._(contextDescription: description),
+      context: DragDropContext._(contextDescription: description),
     );
   }
 
@@ -181,7 +178,7 @@ class Drag extends TestAction {
 
   Future<void> _performReorderDrag(WidgetTester tester) async {
     final itemFinder = _getFromFinder();
-    
+
     if (waitForLongPress) {
       await tester.longPress(itemFinder);
       await tester.pump();
@@ -192,19 +189,16 @@ class Drag extends TestAction {
     final indexDifference = context!.toIndex! - context!.fromIndex!;
     final dragDistance = itemSize.height * indexDifference;
 
-    await tester.timedDrag(
-      itemFinder,
-      Offset(0, dragDistance),
-      duration,
-    );
+    await tester.timedDrag(itemFinder, Offset(0, dragDistance), duration);
   }
 
   Future<void> _performSliderDrag(WidgetTester tester) async {
     final sliderFinder = _getFromFinder();
     final sliderRect = tester.getRect(sliderFinder);
-    
+
     // Calculate target position on slider
-    final targetX = sliderRect.left + (sliderRect.width * context!.targetPosition!);
+    final targetX =
+        sliderRect.left + (sliderRect.width * context!.targetPosition!);
     final targetOffset = Offset(targetX - sliderRect.center.dx, 0);
 
     await tester.timedDrag(sliderFinder, targetOffset, duration);
@@ -212,18 +206,18 @@ class Drag extends TestAction {
 
   Future<void> _performPointToPointDrag(WidgetTester tester) async {
     final gesture = await tester.startGesture(fromPoint!);
-    
+
     if (waitForLongPress) {
       await tester.pump(const Duration(milliseconds: 500));
     }
-    
+
     await gesture.moveTo(toPoint!);
     await gesture.up();
   }
 
   Future<void> _performOffsetDrag(WidgetTester tester) async {
     final fromFinder = _getFromFinder();
-    
+
     if (waitForLongPress) {
       await tester.longPress(fromFinder);
       await tester.pump();
@@ -232,26 +226,30 @@ class Drag extends TestAction {
     await tester.timedDrag(fromFinder, byOffset!, duration);
   }
 
-Future<void> _performWidgetToWidgetDrag(WidgetTester tester) async {
-  final fromFinder = _getFromFinder();
-  final toFinder = _getToFinder();
+  Future<void> _performWidgetToWidgetDrag(WidgetTester tester) async {
+    final fromFinder = _getFromFinder();
+    final toFinder = _getToFinder();
 
-  // Validate that the finders match at least one widget
-  if (fromFinder.evaluate().isEmpty) {
-    throw Exception('No widget found for fromFinder: ${fromText ?? fromKey ?? fromType}');
-  }
-  if (toFinder.evaluate().isEmpty) {
-    throw Exception('No widget found for toFinder: ${toText ?? toKey ?? toType}');
-  }
+    // Validate that the finders match at least one widget
+    if (fromFinder.evaluate().isEmpty) {
+      throw Exception(
+        'No widget found for fromFinder: ${fromText ?? fromKey ?? fromType}',
+      );
+    }
+    if (toFinder.evaluate().isEmpty) {
+      throw Exception(
+        'No widget found for toFinder: ${toText ?? toKey ?? toType}',
+      );
+    }
 
-  if (waitForLongPress) {
-    await tester.longPress(fromFinder);
-    await tester.pump();
-  }
+    if (waitForLongPress) {
+      await tester.longPress(fromFinder);
+      await tester.pump();
+    }
 
-  // Use the timedDragFrom extension method
-  await tester.customTimedDragFrom(fromFinder, toFinder, duration);
-}
+    // Use the timedDragFrom extension method
+    await tester.customTimedDragFrom(fromFinder, toFinder, duration);
+  }
 
   Finder _getFromFinder() {
     if (fromKey != null) {
@@ -308,12 +306,12 @@ extension WidgetTesterDragExtension on WidgetTester {
     final fromCenter = getCenter(from);
     final toCenter = getCenter(to);
     final offset = toCenter - fromCenter;
-    
+
     await timedDrag(from, offset, duration);
   }
 }
 
-class DragContext {
+class DragDropContext {
   final String? contextDescription;
   final bool isReorder;
   final bool isSlider;
@@ -321,7 +319,7 @@ class DragContext {
   final int? toIndex;
   final double? targetPosition;
 
-  const DragContext._({
+  const DragDropContext._({
     this.contextDescription,
     this.isReorder = false,
     this.isSlider = false,
@@ -330,4 +328,3 @@ class DragContext {
     this.targetPosition,
   });
 }
-
