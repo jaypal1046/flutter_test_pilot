@@ -112,26 +112,27 @@ This document outlines all the major sections and components that make up the Fl
 
 ## 5. ASSERTION ACTIONS
 
-### Variable Assertions
-- **Assert.variable(name).equals()** - Variable equality check
-- **Assert.variable(name).isGreaterThan()** - Numeric comparison
-- **Assert.variable(name).contains()** - String containment
-- **Assert.variable(name).isOneOf()** - Value in set check
-- **Assert.variable(name).isNull/isNotNull** - Null checks
+### Variable & Function Assertions (via Global Navigation Context)
+These assertions validate variables and function results using the global navigation context, rather than direct code inspection.
 
-### Widget State Assertions
-- **Assert.widget(id).isVisible()** - Widget visibility
-- **Assert.widget(id).isHidden()** - Widget hidden state
-- **Assert.widget(id).isEnabled()** - Widget enabled state
-- **Assert.widget(id).hasText()** - Widget text content
-- **Assert.widget(id).hasProperty()** - Widget property check
+#### Variable Assertions
+- **Assert.variable(name).equals()** - Checks if a variable in the global context equals a value
+- **Assert.variable(name).isGreaterThan()** - Compares numeric variable value in the global context
+- **Assert.variable(name).contains()** - Checks if a string variable in the global context contains a substring
+- **Assert.variable(name).isOneOf()** - Validates if a variable in the global context matches any value in a set
+- **Assert.variable(name).isNull/isNotNull** - Checks for null/non-null variable state in the global context
 
-### UI State Assertions
-- **Assert.text(text).appearsOnScreen()** - Text presence
-- **Assert.field(id).hasValue()** - Field value check
-- **Assert.field(id).isEmpty()** - Field empty state
-- **Assert.page.isCurrently()** - Current page check
-- **Assert.dialog.isOpen()** - Dialog state check
+#### Function Assertions
+- **Assert.function(name).returns()** - Asserts the return value of a function invoked via the global context
+- **Assert.function(name).throwsError()** - Checks if a function throws an error when called in the global context
+- **Assert.function(name).completes()** - Verifies that an async function completes successfully in the global context
+
+#### Widget & UI State Assertions
+- **Assert.widget(id).isVisible()** - Checks widget visibility using the global navigation context
+- **Assert.widget(id).isEnabled()** - Checks widget enabled state via the global context
+- **Assert.text(text).appearsOnScreen()** - Validates text presence using the global context
+
+> These assertions interact with the app's runtime state through the navigation context, enabling validation without direct code access.
 
 ### API/Network Assertions
 - **Assert.api(endpoint).wasCalled()** - API call verification
