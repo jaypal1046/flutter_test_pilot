@@ -22,6 +22,9 @@ void main() {
       final defaultS = TestSuite(
         name: 'User Login Flow',
         description: 'Complete login process from start to finish',
+        apis: [
+          // Api.
+        ],
 
         setup: [
           // Actions to run before main test
@@ -31,13 +34,7 @@ void main() {
 
         steps: [
           Tap.text("Go to Claims Page")
-          // Main test actions
-          // NavigateTo('/login'),
-          // EnterText('email_field', 'test@example.com'),
-          // EnterText('password_field', 'password123'),
-          // TapButton('login_button'),
-          // WaitForPage<HomePage>(),
-          // VerifyText('Welcome back!'),
+        
         ],
 
         cleanup: [

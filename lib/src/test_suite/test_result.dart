@@ -26,6 +26,9 @@ class TestResult {
       case 'cleanup':
         cleanupResults.add(result);
         break;
+      case 'apis':
+        cleanupResults.add(result);
+        break;  
     }
   }
 

@@ -206,45 +206,45 @@ class TapContext {
 
 /// Convenience methods for specific tap actions
 class Tap extends TapAction {
-  Tap.text(String text, {TapContext? context})
-      : super._(widgetText: text, context: context, gestureType: GestureType.singleTap);
+  Tap.text(String text, {super.context})
+      : super._(widgetText: text, gestureType: GestureType.singleTap);
 
-  Tap.key(String key, {TapContext? context})
-      : super._(widgetKey: key, context: context, gestureType: GestureType.singleTap);
+  Tap.key(String key, {super.context})
+      : super._(widgetKey: key, gestureType: GestureType.singleTap);
 
-  Tap.widget(String text, {TapContext? context})
-      : super._(widgetText: text, context: context, gestureType: GestureType.singleTap);
+  Tap.widget(String text, {super.context})
+      : super._(widgetText: text, gestureType: GestureType.singleTap);
 }
 
 class DoubleTap extends TapAction {
-  DoubleTap.text(String text, {TapContext? context})
-      : super._(widgetText: text, context: context, gestureType: GestureType.doubleTap);
+  DoubleTap.text(String text, {super.context})
+      : super._(widgetText: text, gestureType: GestureType.doubleTap);
 
-  DoubleTap.key(String key, {TapContext? context})
-      : super._(widgetKey: key, context: context, gestureType: GestureType.doubleTap);
+  DoubleTap.key(String key, {super.context})
+      : super._(widgetKey: key, gestureType: GestureType.doubleTap);
 
-  DoubleTap.widget(String text, {TapContext? context})
-      : super._(widgetText: text, context: context, gestureType: GestureType.doubleTap);
+  DoubleTap.widget(String text, {super.context})
+      : super._(widgetText: text, gestureType: GestureType.doubleTap);
 }
 
 class TripleTap extends TapAction {
-  TripleTap.text(String text, {TapContext? context})
-      : super._(widgetText: text, context: context, gestureType: GestureType.tripleTap);
+  TripleTap.text(String text, {super.context})
+      : super._(widgetText: text, gestureType: GestureType.tripleTap);
 
-  TripleTap.key(String key, {TapContext? context})
-      : super._(widgetKey: key, context: context, gestureType: GestureType.tripleTap);
+  TripleTap.key(String key, {super.context})
+      : super._(widgetKey: key, gestureType: GestureType.tripleTap);
 
-  TripleTap.widget(String text, {TapContext? context})
-      : super._(widgetText: text, context: context, gestureType: GestureType.tripleTap);
+  TripleTap.widget(String text, {super.context})
+      : super._(widgetText: text, gestureType: GestureType.tripleTap);
 }
 
 class LongPress extends TapAction {
-  LongPress.text(String text, {TapContext? context})
-      : super._(widgetText: text, context: context, gestureType: GestureType.longPress);
+  LongPress.text(String text, {super.context})
+      : super._(widgetText: text, gestureType: GestureType.longPress);
 
-  LongPress.key(String key, {TapContext? context})
-      : super._(widgetKey: key, context: context, gestureType: GestureType.longPress);
+  LongPress.key(String key, {super.context})
+      : super._(widgetKey: key, gestureType: GestureType.longPress);
 
-  LongPress.widget(String text, {TapContext? context})
-      : super._(widgetText: text, context: context, gestureType: GestureType.longPress);
+  LongPress.widget(String text, {super.context})
+      : super._(widgetText: text, gestureType: GestureType.longPress);
 }

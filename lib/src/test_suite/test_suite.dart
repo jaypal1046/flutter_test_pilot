@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'test_action.dart';
 import 'test_result.dart';
@@ -10,6 +9,7 @@ class TestSuite {
   final String? description;
   final List<TestAction> setup;
   final List<TestAction> steps;
+  final List<TestAction> apis;
   final List<TestAction> cleanup;
   final Duration? timeout;
   final Map<String, dynamic>? metadata;
@@ -19,6 +19,7 @@ class TestSuite {
     this.description,
     this.setup = const [],
     required this.steps,
+    this.apis = const [],
     this.cleanup = const [],
     this.timeout,
     this.metadata,
@@ -39,8 +40,11 @@ class TestSuite {
         await _executeAction(action, tester, result, 'test');
       }
 
-      result.status = TestStatus.passed;
+      for(final action in apis){
+        await _executeAction(action, tester, result, 'apis');
+      }
 
+      result.status = TestStatus.passed;
     } catch (e) {
       result.status = TestStatus.failed;
       result.error = e.toString();
@@ -58,7 +62,12 @@ class TestSuite {
     return result;
   }
 
-  Future<void> _executeAction(TestAction action, WidgetTester tester, TestResult result, String phase) async {
+  Future<void> _executeAction(
+    TestAction action,
+    WidgetTester tester,
+    TestResult result,
+    String phase,
+  ) async {
     final stepResult = await action.execute(tester);
     result.addStepResult(phase, stepResult);
 
@@ -67,14 +76,6 @@ class TestSuite {
     }
   }
 }
-
-
-
-
-
-
-
-
 
 // // =============================================================================
 // // UI INTERACTION ACTIONS
