@@ -158,12 +158,6 @@
       "languageVersion": "3.2"
     },
     {
-      "name": "plugin_platform_interface",
-      "rootUri": "file:///C:/Users/jaypr/AppData/Local/Pub/Cache/hosted/pub.dev/plugin_platform_interface-2.1.8",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
       "name": "process",
       "rootUri": "file:///C:/Users/jaypr/AppData/Local/Pub/Cache/hosted/pub.dev/process-5.0.5",
       "packageUri": "lib/",

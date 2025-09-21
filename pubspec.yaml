@@ -1,7 +1,8 @@
 name: flutter_test_pilot
 description: "A new Flutter plugin project."
 version: 1.0.0
-homepage:
+homepage: https://github.com/jaypal1046/flutter_test_pilot.git
+repository: https://github.com/jaypal1046/flutter_test_pilot.git
 
 environment:
   sdk: ^3.9.0-211.0.dev
