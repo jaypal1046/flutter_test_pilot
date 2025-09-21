@@ -270,9 +270,7 @@ class Pinch extends TestAction {
     final pinchCenter = center ?? await _getTargetCenter(tester);
 
     // Validate pinch center is within screen bounds
-    final screenSize =
-        tester.binding.window.physicalSize /
-        tester.binding.window.devicePixelRatio;
+    final screenSize = tester.view.physicalSize / tester.view.devicePixelRatio;
     if (pinchCenter.dx < 0 ||
         pinchCenter.dy < 0 ||
         pinchCenter.dx > screenSize.width ||
