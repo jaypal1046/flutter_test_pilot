@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/semantics.dart';
@@ -312,8 +314,19 @@ Example: SwitchAction.byText("Dark Mode").inContainer("Settings")
 
       if (semantics != null) {
         // Check if switch is checked/unchecked in semantics using flagsCollection
-
-        return semantics.flagsCollection.isChecked;
+        // Convert CheckedState to bool
+        final checkedState = semantics.flagsCollection.isChecked;
+        switch (checkedState) {
+          case CheckedState.isTrue:
+            return true;
+          case CheckedState.isFalse:
+            return false;
+          case CheckedState.mixed:
+            // Handle mixed state - you might want to treat this differently
+            return false; // or true, depending on your needs
+          case CheckedState.none:
+            return false;
+        }
       }
 
       // Fallback: Try to get widget and cast to specific types
