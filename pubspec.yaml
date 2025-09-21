@@ -5,7 +5,8 @@ homepage: https://github.com/jaypal1046/flutter_test_pilot.git
 repository: https://github.com/jaypal1046/flutter_test_pilot.git
 
 environment:
-  sdk: '>=3.9.0-211.0.dev <4.0.0'
+  sdk: '>=3.8.0 <4.0.0'
+  flutter: ">=3.0.0"     # Use a more recent stable version
 
 dependencies:
   flutter:
