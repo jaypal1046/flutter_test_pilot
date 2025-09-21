@@ -1,10 +1,17 @@
-# See https://www.dartlang.org/guides/libraries/private-files
+# See https://dart.dev/guides/libraries/private-files
 
 # Files and directories created by pub
+.dart_tool/
 .packages
 build/
+pubspec.lock  # Remove this line if this is an application package
+
+# If you're building an application, comment out the following line.
+# If you're building a package, leave it uncommented.
+pubspec.lock
 
 # Directory created by dartdoc
+# If you don't generate docs locally you can remove this line.
 doc/api/
 
 # dotenv environment variables file
@@ -18,5 +25,89 @@ doc/api/
 *.js.deps
 *.js.map
 
+# Flutter/Dart related files (remove if not using Flutter)
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# macOS files
+.DS_Store
+
+# Windows files
+Thumbs.db
+Desktop.ini
+
+# Coverage files
+coverage/
+.coverage
+
+# Test related files
+.test_coverage.dart
+
+# Dependency directories
+node_modules/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# OS generated files
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# JetBrains IDEs
+.idea/
+*.iml
+out/
+
+# Visual Studio Code
+.vscode/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Generated plugin registrant
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Web related (if applicable)
+web/
+
+# Build outputs
+*.aot
+*.app.dill
+*.exe
+
+# Misc
+.fvm/
