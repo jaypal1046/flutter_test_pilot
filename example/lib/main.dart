@@ -7,6 +7,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     TestPilotNavigator.useExistingKey(aliceNavigatorKey);
@@ -22,6 +24,8 @@ class MyApp extends StatelessWidget {
 
 // Home Page
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -97,10 +101,10 @@ class _HomePageState extends State<HomePage> {
 
                 await TestPilotNavigator.navigateAndWait('/claims');
               },
-              child: Text('Go to Claims Page'),
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16),
               ),
+              child: Text('Go to Claims Page'),
             ),
             SizedBox(height: 12),
             ElevatedButton(
@@ -108,11 +112,11 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 await TestPilotNavigator.navigateAndWait('/profile');
               },
-              child: Text('Go to Profile'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 padding: EdgeInsets.symmetric(vertical: 16),
               ),
+              child: Text('Go to Profile'),
             ),
             SizedBox(height: 20),
             Card(
@@ -145,6 +149,8 @@ class _HomePageState extends State<HomePage> {
 
 // Claims Page
 class ClaimsPage extends StatefulWidget {
+  const ClaimsPage({super.key});
+
   @override
   _ClaimsPageState createState() => _ClaimsPageState();
 }
@@ -208,13 +214,13 @@ class _ClaimsPageState extends State<ClaimsPage> {
 
                 // Simulate the mistake - sometimes developers send name instead of number
               },
-              child: isLoading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text('Generate API Payload'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 padding: EdgeInsets.symmetric(vertical: 16),
               ),
+              child: isLoading
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Text('Generate API Payload'),
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -222,11 +228,11 @@ class _ClaimsPageState extends State<ClaimsPage> {
               onPressed: () {
                 TestPilotNavigator.pop();
               },
-              child: Text('Back to Home'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey,
                 padding: EdgeInsets.symmetric(vertical: 16),
               ),
+              child: Text('Back to Home'),
             ),
           ],
         ),
@@ -237,6 +243,8 @@ class _ClaimsPageState extends State<ClaimsPage> {
 
 // Profile Page (Simple)
 class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -272,11 +280,11 @@ class ProfilePage extends StatelessWidget {
               onPressed: () {
                 TestPilotNavigator.pop();
               },
-              child: Text('Back to Home'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey,
                 padding: EdgeInsets.symmetric(vertical: 16),
               ),
+              child: Text('Back to Home'),
             ),
           ],
         ),

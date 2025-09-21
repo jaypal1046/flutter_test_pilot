@@ -206,7 +206,7 @@ class JsonReporter {
     // Individual test reports
     for (int i = 0; i < results.length; i++) {
       final report = generateTestReport(results[i]);
-      final filename = '${base}-test-${i + 1}.json';
+      final filename = '$base-test-${i + 1}.json';
       await JsonReporter(
         outputFile: filename,
         prettyPrint: prettyPrint,

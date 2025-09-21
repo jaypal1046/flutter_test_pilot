@@ -401,31 +401,28 @@ class SwitchContext {
 
 /// Convenience classes for different switch types
 class Switch extends SwitchAction {
-  Switch.toggle({String? key, String? text, Type? type, SwitchContext? context})
+  Switch.toggle({String? key, String? text, Type? type, super.context})
     : super._(
         targetKey: key,
         targetText: text,
         targetType: type,
-        context: context,
         actionType: SwitchActionType.toggle,
       );
 
-  Switch.on({String? key, String? text, Type? type, SwitchContext? context})
+  Switch.on({String? key, String? text, Type? type, super.context})
     : super._(
         targetKey: key,
         targetText: text,
         targetType: type,
-        context: context,
         targetState: SwitchState.on,
         actionType: SwitchActionType.setState,
       );
 
-  Switch.off({String? key, String? text, Type? type, SwitchContext? context})
+  Switch.off({String? key, String? text, Type? type, super.context})
     : super._(
         targetKey: key,
         targetText: text,
         targetType: type,
-        context: context,
         targetState: SwitchState.off,
         actionType: SwitchActionType.setState,
       );

@@ -2,9 +2,6 @@
 import 'dart:io';
 
 import '../../flutter_test_pilot.dart';
-import '../test_suite/test_result.dart';
-import '../test_suite/test_status.dart';
-import '../test_suite/step_result.dart';
 
 /// Reporter that outputs test results to console with colored formatting
 class ConsoleReporter {
@@ -34,14 +31,14 @@ class ConsoleReporter {
     // Show error if failed
     if (result.status == TestStatus.failed && result.error != null) {
       print(
-        '${indent}❌ ${_colorize('Error:', _ConsoleColor.red)} ${result.error}',
+        '$indent❌ ${_colorize('Error:', _ConsoleColor.red)} ${result.error}',
       );
     }
 
     // Show cleanup error if exists
     if (result.cleanupError != null) {
       print(
-        '${indent}⚠️  ${_colorize('Cleanup Error:', _ConsoleColor.yellow)} ${result.cleanupError}',
+        '$indent⚠️  ${_colorize('Cleanup Error:', _ConsoleColor.yellow)} ${result.cleanupError}',
       );
     }
 
@@ -172,7 +169,7 @@ class ConsoleReporter {
 
   /// Print a separator line
   void _printSeparator() {
-    print(_colorize('${'─' * 60}', _ConsoleColor.gray));
+    print(_colorize('─' * 60, _ConsoleColor.gray));
   }
 
   /// Apply color to text if colors are enabled
