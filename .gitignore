@@ -10,6 +10,9 @@ pubspec.lock  # Remove this line if this is an application package
 # If you're building a package, leave it uncommented.
 pubspec.lock
 
+# Example directory lock file (common in package development)
+example/pubspec.lock
+
 # Directory created by dartdoc
 # If you don't generate docs locally you can remove this line.
 doc/api/
@@ -31,7 +34,16 @@ doc/api/
 
 # IDE/Editor files
 .vscode/
+.vscode/launch.json
 .idea/
+.idea/.gitignore
+.idea/flutter_test_pilot.iml
+.idea/libraries/Dart_Packages.xml
+.idea/libraries/Dart_SDK.xml
+.idea/libraries/Flutter_Plugins.xml
+.idea/modules.xml
+.idea/other.xml
+.idea/vcs.xml
 *.iml
 *.ipr
 *.iws
