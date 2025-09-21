@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import '../../step_result.dart';
 import '../../test_action.dart';
 
@@ -314,7 +312,7 @@ Example: SwitchAction.byText("Dark Mode").inContainer("Settings")
       if (semantics != null) {
         // Check if switch is checked/unchecked in semantics using flagsCollection
         // Convert CheckedState to bool
-        final checkedState = semantics.flagsCollection.isChecked.value;
+        final checkedState = semantics.flagsCollection.isChecked.index;
         switch (checkedState) {
           case 1:
             return true;
