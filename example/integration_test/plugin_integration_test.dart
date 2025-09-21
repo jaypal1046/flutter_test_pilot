@@ -45,20 +45,18 @@ void main() {
   });
 }
 
-
 // // example_api_tests.dart
-
 
 // /// Example usage of the API Observer framework
 // class ExampleApiTests {
-  
+
 //   /// 1. Basic Setup - Initialize API Observer with Dio
 //   static void setupApiObserver() {
 //     final dio = Dio();
-    
+
 //     // Initialize the API observer to capture all HTTP calls
 //     ApiObserverManager.initialize(dio);
-    
+
 //     // Optional: Listen to test results in real-time
 //     ApiObserverManager.instance.testResults.listen((result) {
 //       print('API Test Result: ${result.apiId} - ${result.isSuccess ? "PASSED" : "FAILED"}');
@@ -116,20 +114,20 @@ void main() {
 //         // Basic user fields
 //         ResponseCheck('user/id', IntChecker()),
 //         ResponseCheck('user/name', StringChecker()),
-        
+
 //         // Nested address object validation
 //         ResponseCheck('user/address/street', StringChecker(minLength: 5)),
 //         ResponseCheck('user/address/city', StringChecker(minLength: 2)),
 //         ResponseCheck('user/address/zipCode', StringChecker(pattern: RegExp(r'^\d{5}(-\d{4})?$'))),
 //         ResponseCheck('user/address/country', StringChecker(exactValue: 'USA')),
-        
+
 //         // Array of phone numbers
 //         ResponseCheck('user/phoneNumbers', ListChecker(
 //           minLength: 1,
 //           maxLength: 3,
 //           itemChecker: StringChecker(pattern: RegExp(r'^\+?1?-?\d{3}-?\d{3}-?\d{4}$')),
 //         )),
-        
+
 //         // Preferences object
 //         ResponseCheck('user/preferences/notifications', BoolChecker()),
 //         ResponseCheck('user/preferences/theme', StringChecker(exactValue: 'dark')),
@@ -155,7 +153,7 @@ void main() {
 //             'isActive': BoolChecker(),
 //           }),
 //         )),
-        
+
 //         // Validate pagination metadata
 //         ResponseCheck('pagination/total', IntChecker(min: 0)),
 //         ResponseCheck('pagination/page', IntChecker(min: 1)),
@@ -182,7 +180,7 @@ void main() {
 //                 actual: value.runtimeType.toString(),
 //               );
 //             }
-            
+
 //             if (value <= 0) {
 //               return ApiValidationResult.failure(
 //                 fieldPath,
@@ -191,7 +189,7 @@ void main() {
 //                 actual: value,
 //               );
 //             }
-            
+
 //             if (value > 10000) {
 //               return ApiValidationResult.failure(
 //                 fieldPath,
@@ -200,12 +198,12 @@ void main() {
 //                 actual: value,
 //               );
 //             }
-            
+
 //             return ApiValidationResult.success(fieldPath, 'Valid order total: \$${value}');
 //           },
 //           'Positive number ≤ 10000',
 //         )),
-        
+
 //         // Custom date validation
 //         ResponseCheck('createdAt', CustomChecker(
 //           (fieldPath, value) async {
@@ -216,11 +214,11 @@ void main() {
 //                 actual: value.runtimeType.toString(),
 //               );
 //             }
-            
+
 //             try {
 //               final date = DateTime.parse(value);
 //               final now = DateTime.now();
-              
+
 //               if (date.isAfter(now.add(Duration(minutes: 1)))) {
 //                 return ApiValidationResult.failure(
 //                   fieldPath,
@@ -228,7 +226,7 @@ void main() {
 //                   actual: value,
 //                 );
 //               }
-              
+
 //               if (date.isBefore(now.subtract(Duration(hours: 1)))) {
 //                 return ApiValidationResult.failure(
 //                   fieldPath,
@@ -236,7 +234,7 @@ void main() {
 //                   actual: value,
 //                 );
 //               }
-              
+
 //               return ApiValidationResult.success(fieldPath, 'Valid creation date');
 //             } catch (e) {
 //               return ApiValidationResult.failure(
@@ -303,7 +301,7 @@ void main() {
 //   static void setupCompleteTestSuite() {
 //     // Clear any existing tests
 //     ApiObserverManager.instance.clearTests();
-    
+
 //     // Register all tests
 //     final tests = [
 //       createSimpleGetTest(),
@@ -315,12 +313,12 @@ void main() {
 //       createErrorTest(),
 //       createFlexibleStatusTest(),
 //     ];
-    
+
 //     // Execute each test (registers them for monitoring)
 //     for (final test in tests) {
 //       test.execute(null); // WidgetTester not needed for registration
 //     }
-    
+
 //     print('Registered ${tests.length} API tests');
 //   }
 // }
@@ -329,19 +327,19 @@ void main() {
 // void main() {
 //   group('API Integration Tests', () {
 //     late Dio dio;
-    
+
 //     setUpAll(() {
 //       // Initialize Dio and API Observer
 //       dio = Dio();
 //       ApiObserverManager.initialize(dio);
 //       ExampleApiTests.setupCompleteTestSuite();
 //     });
-    
+
 //     testWidgets('User Profile API Flow', (WidgetTester tester) async {
 //       // Your existing widget test code here...
 //       // The API calls made during the test will be automatically captured
 //       // and validated against the registered tests
-      
+
 //       // Simulate some API interactions
 //       await dio.get('/api/users/123');
 //       await dio.post('/api/users', data: {
@@ -349,22 +347,22 @@ void main() {
 //         'email': 'john@example.com',
 //         'age': 30,
 //       });
-      
+
 //       // Wait for async validations to complete
 //       await Future.delayed(Duration(milliseconds: 100));
-      
+
 //       // Check test results
 //       final results = ApiObserverManager.instance.allTestResults;
 //       expect(results.length, greaterThan(0));
-      
+
 //       // Verify specific test passed
 //       final getUserResult = results.firstWhere(
 //         (r) => r.apiId == 'get_user_profile',
 //         orElse: () => throw Exception('get_user_profile test not found'),
 //       );
-      
+
 //       expect(getUserResult.isSuccess, isTrue);
-      
+
 //       // Print detailed results
 //       for (final result in results) {
 //         print('\n--- ${result.apiId} ---');
@@ -372,7 +370,7 @@ void main() {
 //         print('API Call: ${result.apiCall.method} ${result.apiCall.url}');
 //         print('Response Status: ${result.apiCall.statusCode}');
 //         print('Validations: ${result.passedValidations}/${result.totalValidations} passed');
-        
+
 //         if (!result.isSuccess) {
 //           print('Failures:');
 //           for (final failure in result.failures) {
@@ -386,25 +384,25 @@ void main() {
 //           }
 //         }
 //       }
-      
+
 //       // Get JSON results for external reporting
 //       final jsonResults = ApiObserverManager.instance.getAllTestResultsJson();
 //       print('\nJSON Results for external system:');
 //       print(jsonResults);
 //     });
-    
+
 //     testWidgets('Error Handling Test', (WidgetTester tester) async {
 //       try {
 //         await dio.get('/api/users/999999');
 //       } catch (e) {
 //         // Expected error - the test should still validate the error response
 //       }
-      
+
 //       await Future.delayed(Duration(milliseconds: 100));
-      
+
 //       final errorResult = ApiObserverManager.instance.allTestResults
 //           .firstWhere((r) => r.apiId == 'get_nonexistent_user');
-      
+
 //       expect(errorResult.isSuccess, isTrue); // Should pass because we expect 404
 //     });
 //   });
@@ -413,21 +411,21 @@ void main() {
 // /// Example usage in a real app context
 // class RealAppExample {
 //   late Dio dio;
-  
+
 //   void initializeApp() {
 //     dio = Dio(BaseOptions(
 //       baseUrl: 'https://api.example.com',
 //       connectTimeout: Duration(seconds: 5),
 //       receiveTimeout: Duration(seconds: 3),
 //     ));
-    
+
 //     // Add API observer in debug mode
 //     if (kDebugMode) {
 //       ApiObserverManager.initialize(dio);
 //       _setupApiTests();
 //     }
 //   }
-  
+
 //   void _setupApiTests() {
 //     // Register tests for your critical API endpoints
 //     final criticalTests = [
@@ -446,7 +444,7 @@ void main() {
 //           ResponseCheck('expiresAt', StringChecker()),
 //         ],
 //       ),
-      
+
 //       Api.get(
 //         id: 'dashboard_data',
 //         urlPattern: r'/dashboard',
@@ -458,11 +456,11 @@ void main() {
 //         ],
 //       ),
 //     ];
-    
+
 //     for (final test in criticalTests) {
 //       test.execute(null);
 //     }
-    
+
 //     // Monitor results and send to analytics
 //     ApiObserverManager.instance.testResults.listen((result) {
 //       if (!result.isSuccess) {
@@ -470,7 +468,7 @@ void main() {
 //       }
 //     });
 //   }
-  
+
 //   void _reportApiTestFailure(ApiTestResult result) {
 //     // Send failure data to your monitoring system
 //     final failureData = {
@@ -485,7 +483,7 @@ void main() {
 //       }).toList(),
 //       'timestamp': result.timestamp.toIso8601String(),
 //     };
-    
+
 //     // Analytics.reportEvent('api_test_failure', failureData);
 //     print('API Test Failure: $failureData');
 //   }
@@ -497,28 +495,28 @@ void main() {
 //   static StringChecker email() => StringChecker(
 //     pattern: RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'),
 //   );
-  
+
 //   // Phone number validation
 //   static StringChecker phoneNumber() => StringChecker(
 //     pattern: RegExp(r'^\+?1?-?\(?\d{3}\)?-?\d{3}-?\d{4}$'),
 //   );
-  
+
 //   // UUID validation
 //   static StringChecker uuid() => StringChecker(
 //     pattern: RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'),
 //   );
-  
+
 //   // ISO date string
 //   static StringChecker isoDate() => StringChecker(
 //     pattern: RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$'),
 //   );
-  
+
 //   // Positive integer
 //   static IntChecker positiveInt() => IntChecker(min: 1);
-  
+
 //   // Non-negative integer
 //   static IntChecker nonNegativeInt() => IntChecker(min: 0);
-  
+
 //   // Pagination object
 //   static ObjectChecker pagination() => ObjectChecker({
 //     'page': IntChecker(min: 1),

@@ -1,6 +1,8 @@
 import 'step_result.dart';
 import 'test_status.dart';
+
 enum TestPhase { setup, test, apis, cleanup }
+
 /// Overall test result
 class TestResult {
   final String suiteName;
@@ -28,9 +30,10 @@ class TestResult {
         break;
       case TestPhase.apis:
         cleanupResults.add(result);
-        break;  
+        break;
     }
   }
 
-  Duration get totalDuration => (endTime ?? DateTime.now()).difference(startTime);
+  Duration get totalDuration =>
+      (endTime ?? DateTime.now()).difference(startTime);
 }

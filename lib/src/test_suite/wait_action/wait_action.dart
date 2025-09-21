@@ -1,4 +1,3 @@
-
 import '../step_result.dart';
 import '../test_action.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,7 +18,7 @@ class Wait extends TestAction {
 
   @override
   Future<StepResult> execute(WidgetTester tester) async {
-  return await condition.execute(tester);
+    return await condition.execute(tester);
   }
 
   @override
@@ -77,7 +76,7 @@ class WaitUntil {
 class _WaitUntilWidgetExists extends WaitCondition {
   final String identifier;
 
-   _WaitUntilWidgetExists(this.identifier);
+  _WaitUntilWidgetExists(this.identifier);
 
   @override
   Future<StepResult> execute(WidgetTester tester) async {
@@ -111,7 +110,7 @@ class _WaitUntilWidgetExists extends WaitCondition {
 class _WaitUntilApiCall extends WaitCondition {
   final String endpoint;
 
-   _WaitUntilApiCall(this.endpoint);
+  _WaitUntilApiCall(this.endpoint);
 
   @override
   Future<StepResult> execute(WidgetTester tester) async {

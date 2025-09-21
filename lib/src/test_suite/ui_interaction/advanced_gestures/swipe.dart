@@ -169,7 +169,10 @@ class Swipe extends TestAction {
       );
     } catch (e) {
       stopwatch.stop();
-      return StepResult.failure('Swipe failed: $e', duration: stopwatch.elapsed);
+      return StepResult.failure(
+        'Swipe failed: $e',
+        duration: stopwatch.elapsed,
+      );
     }
   }
 
@@ -197,10 +200,10 @@ class Swipe extends TestAction {
     }
 
     // Handle multiple matches
-    if (targetFinder != find.byType(MaterialApp).first && 
+    if (targetFinder != find.byType(MaterialApp).first &&
         tester.widgetList(targetFinder).length > 1) {
       if (context?.widgetDescription != null) {
-        // For now, use first match - in real implementation, 
+        // For now, use first match - in real implementation,
         // you'd add logic to find by context
         targetFinder = targetFinder.first;
       } else {
@@ -209,7 +212,7 @@ class Swipe extends TestAction {
     }
 
     Offset swipeOffset = _getSwipeOffset();
-    
+
     if (context?.isDismiss == true) {
       // For dismiss, we need to ensure the swipe goes far enough
       await tester.timedDrag(targetFinder, swipeOffset, duration);
@@ -220,7 +223,7 @@ class Swipe extends TestAction {
 
   Offset _getSwipeOffset() {
     final swipeDistance = distance ?? 300.0;
-    
+
     switch (direction) {
       case SwipeDirection.up:
         return Offset(0, -swipeDistance);
@@ -239,14 +242,15 @@ class Swipe extends TestAction {
     if (startPoint != null && endPoint != null) {
       return 'Swiped from $startPoint to $endPoint';
     }
-    
-    String target = targetText ?? targetKey ?? targetType?.toString() ?? 'screen';
+
+    String target =
+        targetText ?? targetKey ?? targetType?.toString() ?? 'screen';
     String directionStr = direction.toString().split('.').last;
-    
+
     if (context?.isDismiss == true) {
       return 'Swiped to dismiss $target';
     }
-    
+
     return 'Swiped $directionStr on $target';
   }
 
@@ -260,8 +264,5 @@ class SwipeContext {
   final String? widgetDescription;
   final bool isDismiss;
 
-  const SwipeContext._({
-    this.widgetDescription,
-    this.isDismiss = false,
-  });
+  const SwipeContext._({this.widgetDescription, this.isDismiss = false});
 }

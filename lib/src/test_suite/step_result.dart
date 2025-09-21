@@ -14,7 +14,11 @@ class StepResult {
     this.data,
   });
 
-  factory StepResult.success({String? message, Duration? duration, Map<String, dynamic>? data}) {
+  factory StepResult.success({
+    String? message,
+    Duration? duration,
+    Map<String, dynamic>? data,
+  }) {
     return StepResult(
       success: true,
       message: message,

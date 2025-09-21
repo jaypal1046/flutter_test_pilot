@@ -86,7 +86,11 @@ class Scroll extends TestAction {
   }
 
   /// Scroll until widget is visible by text
-  factory Scroll.untilVisible(String text, {Duration? duration, ScrollContext? context}) {
+  factory Scroll.untilVisible(
+    String text, {
+    Duration? duration,
+    ScrollContext? context,
+  }) {
     return Scroll._(
       targetText: text,
       duration: duration ?? const Duration(milliseconds: 300),
@@ -95,7 +99,11 @@ class Scroll extends TestAction {
   }
 
   /// Scroll until widget is visible by key
-  factory Scroll.untilVisibleByKey(String key, {Duration? duration, ScrollContext? context}) {
+  factory Scroll.untilVisibleByKey(
+    String key, {
+    Duration? duration,
+    ScrollContext? context,
+  }) {
     return Scroll._(
       targetKey: key,
       duration: duration ?? const Duration(milliseconds: 300),
@@ -104,7 +112,11 @@ class Scroll extends TestAction {
   }
 
   /// Scroll until widget is visible by type
-  factory Scroll.untilVisibleByType(Type type, {Duration? duration, ScrollContext? context}) {
+  factory Scroll.untilVisibleByType(
+    Type type, {
+    Duration? duration,
+    ScrollContext? context,
+  }) {
     return Scroll._(
       targetType: type,
       duration: duration ?? const Duration(milliseconds: 300),
@@ -153,13 +165,16 @@ class Scroll extends TestAction {
       );
     } catch (e) {
       stopwatch.stop();
-      return StepResult.failure('Scroll failed: $e', duration: stopwatch.elapsed);
+      return StepResult.failure(
+        'Scroll failed: $e',
+        duration: stopwatch.elapsed,
+      );
     }
   }
 
   Future<void> _scrollUntilVisible(WidgetTester tester) async {
     Finder targetFinder;
-    
+
     if (targetKey != null) {
       targetFinder = find.byKey(Key(targetKey!));
     } else if (targetText != null) {
@@ -172,12 +187,12 @@ class Scroll extends TestAction {
 
     // Find scrollable widget
     Finder scrollableFinder = _findScrollableWidget(tester);
-    
+
     // Scroll until target is visible
     await tester.scrollUntilVisible(
       targetFinder,
-        -200.0, // Default scroll delta
-     scrollable:  scrollableFinder,
+      -200.0, // Default scroll delta
+      scrollable: scrollableFinder,
       maxScrolls: 50,
     );
   }
@@ -185,12 +200,12 @@ class Scroll extends TestAction {
   Future<void> _scrollToPosition(WidgetTester tester) async {
     final scrollableFinder = _findScrollableWidget(tester);
     final scrollableWidget = tester.widget(scrollableFinder);
-    
+
     if (scrollableWidget is Scrollable) {
       final controller = scrollableWidget.controller;
       if (controller != null) {
         double targetPosition;
-        
+
         if (position!.isRelative) {
           final maxExtent = controller.position.maxScrollExtent;
           targetPosition = maxExtent * position!.value;
@@ -213,7 +228,7 @@ class Scroll extends TestAction {
 
   Future<void> _scrollDirectional(WidgetTester tester) async {
     final scrollableFinder = _findScrollableWidget(tester);
-    
+
     Offset scrollOffset;
     switch (direction!) {
       case ScrollDirection.up:
@@ -230,7 +245,7 @@ class Scroll extends TestAction {
         break;
     }
 
-    await tester.drag(scrollableFinder, scrollOffset,);
+    await tester.drag(scrollableFinder, scrollOffset);
   }
 
   Finder _findScrollableWidget(WidgetTester tester) {
@@ -238,7 +253,7 @@ class Scroll extends TestAction {
       // Try to find scrollable by description logic here
       // For now, return first scrollable
     }
-    
+
     // Find first scrollable widget
     final scrollables = [
       find.byType(ListView),
@@ -247,13 +262,13 @@ class Scroll extends TestAction {
       find.byType(CustomScrollView),
       find.byType(Scrollable),
     ];
-    
+
     for (final finder in scrollables) {
       if (finder.evaluate().isNotEmpty) {
         return finder.first;
       }
     }
-    
+
     throw Exception('No scrollable widget found');
   }
 
@@ -279,14 +294,18 @@ class ScrollPosition {
   final bool isTop;
   final bool isBottom;
 
-  const ScrollPosition._(this.value, {
+  const ScrollPosition._(
+    this.value, {
     this.isRelative = false,
     this.isTop = false,
     this.isBottom = false,
   });
 
   factory ScrollPosition.relative(double position) {
-    assert(position >= 0.0 && position <= 1.0, 'Relative position must be between 0.0 and 1.0');
+    assert(
+      position >= 0.0 && position <= 1.0,
+      'Relative position must be between 0.0 and 1.0',
+    );
     return ScrollPosition._(position, isRelative: true);
   }
 

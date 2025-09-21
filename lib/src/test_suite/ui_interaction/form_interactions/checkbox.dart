@@ -5,7 +5,6 @@ import '../../step_result.dart';
 import '../../test_action.dart';
 import '../advanced_gestures/scroll.dart';
 
-
 /// Checkbox interaction action that uses tap and scroll gestures
 class CheckboxAction extends TestAction {
   final String? checkboxKey;
@@ -148,7 +147,9 @@ class CheckboxAction extends TestAction {
     return CheckboxAction._(
       checkboxKey: byKey ? identifier : null,
       checkboxLabel: !byKey ? identifier : null,
-      operation: expectedState ? CheckboxOperation.verifyChecked : CheckboxOperation.verifyUnchecked,
+      operation: expectedState
+          ? CheckboxOperation.verifyChecked
+          : CheckboxOperation.verifyUnchecked,
       context: context,
     );
   }
@@ -217,15 +218,15 @@ class CheckboxAction extends TestAction {
     try {
       // Find the checkbox
       final checkboxFinder = await _findCheckbox(tester);
-      
+
       // Perform the operation
       await _performOperation(tester, checkboxFinder);
-      
+
       // Wait for UI to settle
       await tester.pumpAndSettle();
-      
+
       stopwatch.stop();
-      
+
       return StepResult.success(
         message: _getSuccessMessage(),
         duration: stopwatch.elapsed,
@@ -242,10 +243,11 @@ class CheckboxAction extends TestAction {
   Future<Finder> _findCheckbox(WidgetTester tester) async {
     final endTime = DateTime.now().add(searchTimeout);
     var scrollAttempts = 0;
-    
-    while (DateTime.now().isBefore(endTime) && scrollAttempts < maxScrollAttempts) {
+
+    while (DateTime.now().isBefore(endTime) &&
+        scrollAttempts < maxScrollAttempts) {
       Finder? checkboxFinder;
-      
+
       // Try different methods to find the checkbox
       if (checkboxKey != null) {
         checkboxFinder = find.byKey(Key(checkboxKey!));
@@ -256,17 +258,18 @@ class CheckboxAction extends TestAction {
       } else if (checkboxType != null) {
         checkboxFinder = find.byType(checkboxType!);
       }
-      
-      if (checkboxFinder != null && tester.widgetList(checkboxFinder).isNotEmpty) {
+
+      if (checkboxFinder != null &&
+          tester.widgetList(checkboxFinder).isNotEmpty) {
         return _disambiguateCheckbox(checkboxFinder, tester);
       }
-      
+
       // Checkbox not found, scroll to find it
       await _scrollToFindCheckbox(tester);
       await tester.pumpAndSettle(const Duration(milliseconds: 300));
       scrollAttempts++;
     }
-    
+
     throw Exception('Checkbox not found: ${_getCheckboxIdentifier()}');
   }
 
@@ -274,7 +277,7 @@ class CheckboxAction extends TestAction {
     // Look for checkbox with associated label
     final checkboxes = find.byType(Checkbox);
     final checkboxTiles = find.byType(CheckboxListTile);
-    
+
     // Try CheckboxListTile first (has built-in label)
     for (final tile in tester.widgetList(checkboxTiles)) {
       final checkboxListTile = tile as CheckboxListTile;
@@ -285,7 +288,7 @@ class CheckboxAction extends TestAction {
         }
       }
     }
-    
+
     // Look for text near checkbox widgets
     final labelFinder = find.text(checkboxLabel!);
     if (tester.widgetList(labelFinder).isNotEmpty) {
@@ -293,28 +296,29 @@ class CheckboxAction extends TestAction {
       for (final checkbox in tester.widgetList(checkboxes)) {
         final checkboxWidget = tester.getRect(find.byWidget(checkbox));
         final labelWidget = tester.getRect(labelFinder.first);
-        
+
         // Check if checkbox and label are close to each other
         final distance = (checkboxWidget.center - labelWidget.center).distance;
-        if (distance < 100) { // Adjust threshold as needed
+        if (distance < 100) {
+          // Adjust threshold as needed
           return find.byWidget(checkbox);
         }
       }
-      
+
       // Fallback: tap on the label itself (might trigger checkbox)
       return labelFinder.first;
     }
-    
+
     throw Exception('Checkbox with label "$checkboxLabel" not found');
   }
 
   Finder _disambiguateCheckbox(Finder finder, WidgetTester tester) {
     final widgets = tester.widgetList(finder);
-    
+
     if (widgets.length == 1) {
       return finder.first;
     }
-    
+
     // Multiple checkboxes found, use context to disambiguate
     if (context?.position != null) {
       switch (context!.position!.toLowerCase()) {
@@ -327,18 +331,20 @@ class CheckboxAction extends TestAction {
           if (index != null && index < widgets.length) {
             return finder.at(index);
           }
-          throw Exception('Invalid position "${context!.position}" for checkbox. '
-              'Use "first", "last", or a valid index.');
+          throw Exception(
+            'Invalid position "${context!.position}" for checkbox. '
+            'Use "first", "last", or a valid index.',
+          );
       }
     }
-    
+
     if (context?.contextDescription != null) {
       // Find checkbox within specific context/ancestor
       final contextFinder = find.ancestor(
         of: finder,
         matching: find.byWidgetPredicate(
           (widget) => widget.toString().toLowerCase().contains(
-            context!.contextDescription!.toLowerCase()
+            context!.contextDescription!.toLowerCase(),
           ),
         ),
       );
@@ -346,13 +352,13 @@ class CheckboxAction extends TestAction {
         return contextFinder.first;
       }
     }
-    
+
     if (context?.groupName != null) {
       // Look for checkboxes in a specific group/form section
       final groupFinder = find.text(context!.groupName!);
       if (tester.widgetList(groupFinder).isNotEmpty) {
         final groupRect = tester.getRect(groupFinder.first);
-        
+
         // Find checkboxes near the group title
         for (int i = 0; i < widgets.length; i++) {
           final checkboxRect = tester.getRect(finder.at(i));
@@ -362,7 +368,7 @@ class CheckboxAction extends TestAction {
         }
       }
     }
-    
+
     throw Exception('''
 Found ${widgets.length} checkboxes matching criteria.
 Use .inContext("description"), .atPosition("first|last|index"), or .inGroup("group name") to disambiguate:
@@ -373,9 +379,12 @@ Example: CheckboxAction.checkByLabel("Accept Terms").inContext("Registration For
 ''');
   }
 
-  Future<void> _performOperation(WidgetTester tester, Finder checkboxFinder) async {
+  Future<void> _performOperation(
+    WidgetTester tester,
+    Finder checkboxFinder,
+  ) async {
     final currentState = _getCheckboxState(tester, checkboxFinder);
-    
+
     switch (operation) {
       case CheckboxOperation.check:
         if (!currentState) {
@@ -384,7 +393,7 @@ Example: CheckboxAction.checkByLabel("Accept Terms").inContext("Registration For
           throw Exception('Checkbox is already checked');
         }
         break;
-        
+
       case CheckboxOperation.uncheck:
         if (currentState) {
           await _tapCheckbox(tester, checkboxFinder);
@@ -392,20 +401,24 @@ Example: CheckboxAction.checkByLabel("Accept Terms").inContext("Registration For
           throw Exception('Checkbox is already unchecked');
         }
         break;
-        
+
       case CheckboxOperation.toggle:
         await _tapCheckbox(tester, checkboxFinder);
         break;
-        
+
       case CheckboxOperation.verifyChecked:
         if (!currentState) {
-          throw Exception('Expected checkbox to be checked, but it was unchecked');
+          throw Exception(
+            'Expected checkbox to be checked, but it was unchecked',
+          );
         }
         break;
-        
+
       case CheckboxOperation.verifyUnchecked:
         if (currentState) {
-          throw Exception('Expected checkbox to be unchecked, but it was checked');
+          throw Exception(
+            'Expected checkbox to be unchecked, but it was checked',
+          );
         }
         break;
     }
@@ -418,7 +431,7 @@ Example: CheckboxAction.checkByLabel("Accept Terms").inContext("Registration For
 
   bool _getCheckboxState(WidgetTester tester, Finder checkboxFinder) {
     final widget = tester.widget(checkboxFinder);
-    
+
     if (widget is Checkbox) {
       return widget.value ?? false;
     } else if (widget is CheckboxListTile) {
@@ -449,7 +462,11 @@ Example: CheckboxAction.checkByLabel("Accept Terms").inContext("Registration For
   }
 
   String _getCheckboxIdentifier() {
-    return checkboxKey ?? checkboxLabel ?? checkboxText ?? checkboxType?.toString() ?? 'unknown';
+    return checkboxKey ??
+        checkboxLabel ??
+        checkboxText ??
+        checkboxType?.toString() ??
+        'unknown';
   }
 
   String _getSuccessMessage() {
@@ -469,7 +486,8 @@ Example: CheckboxAction.checkByLabel("Accept Terms").inContext("Registration For
   }
 
   @override
-  String get description => '${operation.name} checkbox: ${_getCheckboxIdentifier()}';
+  String get description =>
+      '${operation.name} checkbox: ${_getCheckboxIdentifier()}';
 }
 
 enum CheckboxOperation {
@@ -495,35 +513,54 @@ class CheckboxContext {
 /// Convenience classes for common checkbox operations
 class CheckBox {
   /// Check a checkbox
-  static CheckboxAction check(String identifier, {bool byKey = false, CheckboxContext? context}) {
-    return byKey 
+  static CheckboxAction check(
+    String identifier, {
+    bool byKey = false,
+    CheckboxContext? context,
+  }) {
+    return byKey
         ? CheckboxAction.checkByKey(identifier, context: context)
         : CheckboxAction.checkByLabel(identifier, context: context);
   }
 
-  /// Uncheck a checkbox  
-  static CheckboxAction uncheck(String identifier, {bool byKey = false, CheckboxContext? context}) {
-    return byKey 
+  /// Uncheck a checkbox
+  static CheckboxAction uncheck(
+    String identifier, {
+    bool byKey = false,
+    CheckboxContext? context,
+  }) {
+    return byKey
         ? CheckboxAction.uncheckByKey(identifier, context: context)
         : CheckboxAction.uncheckByLabel(identifier, context: context);
   }
 
   /// Toggle a checkbox
-  static CheckboxAction toggle(String identifier, {bool byKey = false, CheckboxContext? context}) {
-    return byKey 
+  static CheckboxAction toggle(
+    String identifier, {
+    bool byKey = false,
+    CheckboxContext? context,
+  }) {
+    return byKey
         ? CheckboxAction.toggleByKey(identifier, context: context)
         : CheckboxAction.toggleByLabel(identifier, context: context);
   }
 
   /// Verify checkbox state
-  static CheckboxAction verify(String identifier, bool shouldBeChecked, {bool byKey = false}) {
-    return CheckboxAction.verifyState(identifier, shouldBeChecked, byKey: byKey);
+  static CheckboxAction verify(
+    String identifier,
+    bool shouldBeChecked, {
+    bool byKey = false,
+  }) {
+    return CheckboxAction.verifyState(
+      identifier,
+      shouldBeChecked,
+      byKey: byKey,
+    );
   }
 }
 
 /// Extended checkbox actions for complex scenarios
 class CheckboxActions {
-  
   /// Select multiple checkboxes in a group
   static Future<StepResult> selectMultiple(
     WidgetTester tester,
@@ -533,23 +570,23 @@ class CheckboxActions {
   }) async {
     final stopwatch = Stopwatch()..start();
     final results = <String>[];
-    
+
     try {
       for (final label in checkboxLabels) {
-        final action = byKey 
+        final action = byKey
             ? CheckboxAction.checkByKey(label, context: context)
             : CheckboxAction.checkByLabel(label, context: context);
-            
+
         final result = await action.execute(tester);
         if (result.success) {
           results.add(label);
         } else {
           throw Exception('Failed to check $label: ${result.message}');
         }
-        
+
         await tester.pump(const Duration(milliseconds: 200));
       }
-      
+
       stopwatch.stop();
       return StepResult.success(
         message: 'Checked ${results.length} checkboxes: ${results.join(", ")}',
@@ -573,24 +610,25 @@ class CheckboxActions {
   }) async {
     final stopwatch = Stopwatch()..start();
     final results = <String>[];
-    
+
     try {
       for (final label in checkboxLabels) {
-        final action = byKey 
+        final action = byKey
             ? CheckboxAction.uncheckByKey(label, context: context)
             : CheckboxAction.uncheckByLabel(label, context: context);
-            
+
         final result = await action.execute(tester);
         if (result.success) {
           results.add(label);
         }
-        
+
         await tester.pump(const Duration(milliseconds: 200));
       }
-      
+
       stopwatch.stop();
       return StepResult.success(
-        message: 'Unchecked ${results.length} checkboxes: ${results.join(", ")}',
+        message:
+            'Unchecked ${results.length} checkboxes: ${results.join(", ")}',
         duration: stopwatch.elapsed,
       );
     } catch (e) {
@@ -608,33 +646,33 @@ class CheckboxActions {
     Type checkboxType,
   ) async {
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       final finder = find.byType(checkboxType);
       final checkboxes = tester.widgetList(finder);
       var checkedCount = 0;
-      
+
       for (int i = 0; i < checkboxes.length; i++) {
         final checkboxFinder = finder.at(i);
         final widget = tester.widget(checkboxFinder);
-        
+
         bool isChecked = false;
         if (widget is Checkbox) {
           isChecked = widget.value ?? false;
         } else if (widget is CheckboxListTile) {
           isChecked = widget.value ?? false;
         }
-        
+
         if (!isChecked) {
           await tester.tap(checkboxFinder);
           await tester.pump(const Duration(milliseconds: 100));
           checkedCount++;
         }
       }
-      
+
       await tester.pumpAndSettle();
       stopwatch.stop();
-      
+
       return StepResult.success(
         message: 'Checked $checkedCount out of ${checkboxes.length} checkboxes',
         duration: stopwatch.elapsed,
@@ -655,7 +693,7 @@ class CheckboxActions {
     bool byKey = false,
   }) async {
     final states = <String, bool>{};
-    
+
     for (final label in checkboxLabels) {
       try {
         final action = CheckboxAction.verifyState(label, true, byKey: byKey);
@@ -666,7 +704,7 @@ class CheckboxActions {
         states[label] = false; // Default to unchecked if not found
       }
     }
-    
+
     return states;
   }
 }

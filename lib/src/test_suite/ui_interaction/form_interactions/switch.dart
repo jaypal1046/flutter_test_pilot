@@ -78,7 +78,9 @@ class SwitchAction extends TestAction {
     return SwitchAction._(
       targetText: text,
       targetState: state,
-      actionType: state != null ? SwitchActionType.setState : SwitchActionType.toggle,
+      actionType: state != null
+          ? SwitchActionType.setState
+          : SwitchActionType.toggle,
     );
   }
 
@@ -87,7 +89,9 @@ class SwitchAction extends TestAction {
     return SwitchAction._(
       targetKey: key,
       targetState: state,
-      actionType: state != null ? SwitchActionType.setState : SwitchActionType.toggle,
+      actionType: state != null
+          ? SwitchActionType.setState
+          : SwitchActionType.toggle,
     );
   }
 
@@ -137,7 +141,10 @@ class SwitchAction extends TestAction {
       );
     } catch (e) {
       stopwatch.stop();
-      return StepResult.failure('Switch action failed: $e', duration: stopwatch.elapsed);
+      return StepResult.failure(
+        'Switch action failed: $e',
+        duration: stopwatch.elapsed,
+      );
     }
   }
 
@@ -149,12 +156,12 @@ class SwitchAction extends TestAction {
     } else if (targetText != null) {
       // Try to find switch by semantics label first
       finder = find.bySemanticsLabel(targetText!);
-      
+
       // Filter to only switch widgets
       if (tester.widgetList(finder).isNotEmpty) {
         finder = _filterToSwitchTypes(finder, tester);
       }
-      
+
       if (tester.widgetList(finder).isEmpty) {
         // Fallback: find switch near the text
         finder = _findSwitchNearText(tester, targetText!);
@@ -180,7 +187,7 @@ class SwitchAction extends TestAction {
 
   Finder _filterToSwitchTypes(Finder baseFinder, WidgetTester tester) {
     final switchTypes = [Switch, CupertinoSwitch, SwitchListTile];
-    
+
     for (final switchType in switchTypes) {
       final filtered = find.descendant(
         of: baseFinder,
@@ -190,7 +197,7 @@ class SwitchAction extends TestAction {
         return filtered;
       }
     }
-    
+
     return baseFinder;
   }
 
@@ -205,7 +212,7 @@ class SwitchAction extends TestAction {
       of: textFinder,
       matching: _getSwitchTypeFinder(),
     );
-    
+
     if (tester.widgetList(switchFinder).isNotEmpty) {
       return switchFinder;
     }
@@ -213,21 +220,22 @@ class SwitchAction extends TestAction {
     // Look for switch as sibling (in same parent container)
     final parentFinder = find.ancestor(
       of: textFinder,
-      matching: find.byWidgetPredicate((widget) => 
-        widget is Container || 
-        widget is Row || 
-        widget is Column ||
-        widget is ListTile ||
-        widget is Card
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is Container ||
+            widget is Row ||
+            widget is Column ||
+            widget is ListTile ||
+            widget is Card,
       ),
     );
-    
+
     if (tester.widgetList(parentFinder).isNotEmpty) {
       switchFinder = find.descendant(
         of: parentFinder.first,
         matching: _getSwitchTypeFinder(),
       );
-      
+
       if (tester.widgetList(switchFinder).isNotEmpty) {
         return switchFinder;
       }
@@ -238,10 +246,11 @@ class SwitchAction extends TestAction {
   }
 
   Finder _getSwitchTypeFinder() {
-    return find.byWidgetPredicate((widget) => 
-      widget is Switch || 
-      widget is CupertinoSwitch || 
-      widget is SwitchListTile
+    return find.byWidgetPredicate(
+      (widget) =>
+          widget is Switch ||
+          widget is CupertinoSwitch ||
+          widget is SwitchListTile,
     );
   }
 
@@ -251,13 +260,13 @@ class SwitchAction extends TestAction {
       find.byType(CupertinoSwitch),
       find.byType(SwitchListTile),
     ];
-    
+
     for (final finder in switchFinders) {
       if (tester.widgetList(finder).isNotEmpty) {
         return finder;
       }
     }
-    
+
     throw Exception('No switch widgets found in the widget tree');
   }
 
@@ -273,8 +282,10 @@ class SwitchAction extends TestAction {
           if (index != null && index < tester.widgetList(finder).length) {
             return finder.at(index);
           }
-          throw Exception('Invalid position "${context!.position}" for switch. '
-              'Use "first", "last", or a valid index.');
+          throw Exception(
+            'Invalid position "${context!.position}" for switch. '
+            'Use "first", "last", or a valid index.',
+          );
       }
     }
 
@@ -298,18 +309,20 @@ Example: SwitchAction.byText("Dark Mode").inContainer("Settings")
       // Try to get the state from semantics first (most reliable)
       final element = tester.element(finder);
       final semantics = element.renderObject?.debugSemantics;
-      
+
       if (semantics != null) {
         // Check if switch is checked/unchecked in semantics
-        final hasCheckedState = semantics.hasFlag(SemanticsFlag.hasCheckedState);
+        final hasCheckedState = semantics.hasFlag(
+          SemanticsFlag.hasCheckedState,
+        );
         if (hasCheckedState) {
           return semantics.hasFlag(SemanticsFlag.isChecked);
         }
       }
-      
+
       // Fallback: Try to get widget and cast to specific types
       final widget = tester.widget(finder);
-      
+
       // We need to cast to the actual widget type to access value property
       if (widget.runtimeType.toString() == 'Switch') {
         final switchWidget = widget as dynamic;
@@ -321,12 +334,11 @@ Example: SwitchAction.byText("Dark Mode").inContainer("Settings")
         final switchListTile = widget as dynamic;
         return (switchListTile.value as bool?) ?? false;
       }
-      
     } catch (e) {
       // If all else fails, assume false and let the toggle happen
       print('Could not determine switch state: $e');
     }
-    
+
     return false; // Default to false (off)
   }
 
@@ -340,18 +352,19 @@ Example: SwitchAction.byText("Dark Mode").inContainer("Settings")
         return currentState; // Only toggle if currently on
       }
     }
-    
+
     return false;
   }
 
   String _getSuccessMessage(bool currentState, bool didToggle) {
-    String target = targetText ?? targetKey ?? targetType?.toString() ?? 'switch';
-    
+    String target =
+        targetText ?? targetKey ?? targetType?.toString() ?? 'switch';
+
     if (!didToggle) {
       String stateStr = targetState == SwitchState.on ? 'ON' : 'OFF';
       return 'Switch "$target" was already $stateStr';
     }
-    
+
     if (actionType == SwitchActionType.toggle) {
       String newState = currentState ? 'OFF' : 'ON';
       return 'Toggled switch "$target" to $newState';
@@ -363,8 +376,9 @@ Example: SwitchAction.byText("Dark Mode").inContainer("Settings")
 
   @override
   String get description {
-    String target = targetText ?? targetKey ?? targetType?.toString() ?? 'switch';
-    
+    String target =
+        targetText ?? targetKey ?? targetType?.toString() ?? 'switch';
+
     if (actionType == SwitchActionType.toggle) {
       return 'Toggle switch "$target"';
     } else {
@@ -388,52 +402,54 @@ class SwitchContext {
 /// Convenience classes for different switch types
 class Switch extends SwitchAction {
   Switch.toggle({String? key, String? text, Type? type, SwitchContext? context})
-      : super._(
-          targetKey: key,
-          targetText: text,
-          targetType: type,
-          context: context,
-          actionType: SwitchActionType.toggle,
-        );
+    : super._(
+        targetKey: key,
+        targetText: text,
+        targetType: type,
+        context: context,
+        actionType: SwitchActionType.toggle,
+      );
 
   Switch.on({String? key, String? text, Type? type, SwitchContext? context})
-      : super._(
-          targetKey: key,
-          targetText: text,
-          targetType: type,
-          context: context,
-          targetState: SwitchState.on,
-          actionType: SwitchActionType.setState,
-        );
+    : super._(
+        targetKey: key,
+        targetText: text,
+        targetType: type,
+        context: context,
+        targetState: SwitchState.on,
+        actionType: SwitchActionType.setState,
+      );
 
   Switch.off({String? key, String? text, Type? type, SwitchContext? context})
-      : super._(
-          targetKey: key,
-          targetText: text,
-          targetType: type,
-          context: context,
-          targetState: SwitchState.off,
-          actionType: SwitchActionType.setState,
-        );
+    : super._(
+        targetKey: key,
+        targetText: text,
+        targetType: type,
+        context: context,
+        targetState: SwitchState.off,
+        actionType: SwitchActionType.setState,
+      );
 }
 
 /// Extension methods for common switch scenarios
 extension SwitchExtensions on SwitchAction {
   /// Enable a feature switch
-  static SwitchAction enable(String featureName) => SwitchAction.turnOn(text: featureName);
-  
-  /// Disable a feature switch  
-  static SwitchAction disable(String featureName) => SwitchAction.turnOff(text: featureName);
-  
+  static SwitchAction enable(String featureName) =>
+      SwitchAction.turnOn(text: featureName);
+
+  /// Disable a feature switch
+  static SwitchAction disable(String featureName) =>
+      SwitchAction.turnOff(text: featureName);
+
   /// Toggle notification settings
-  static SwitchAction notification(String type, {SwitchState? state}) => 
+  static SwitchAction notification(String type, {SwitchState? state}) =>
       SwitchAction.byText("$type notifications", state: state);
-  
+
   /// Toggle dark mode
-  static SwitchAction darkMode({SwitchState? state}) => 
+  static SwitchAction darkMode({SwitchState? state}) =>
       SwitchAction.byText("Dark mode", state: state);
-      
+
   /// Toggle WiFi/Bluetooth/etc
-  static SwitchAction connectivity(String type, {SwitchState? state}) => 
+  static SwitchAction connectivity(String type, {SwitchState? state}) =>
       SwitchAction.byText(type, state: state);
 }

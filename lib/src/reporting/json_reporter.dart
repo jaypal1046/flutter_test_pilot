@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -42,12 +41,13 @@ class JsonReporter {
           },
         },
         'summary': {
-          'totalSteps': result.setupResults.length + 
-                       result.testResults.length + 
-                       result.cleanupResults.length,
+          'totalSteps':
+              result.setupResults.length +
+              result.testResults.length +
+              result.cleanupResults.length,
           'successfulSteps': _countSuccessfulSteps(result),
           'failedSteps': _countFailedSteps(result),
-        }
+        },
       },
       'timestamp': DateTime.now().toIso8601String(),
       'reportVersion': '1.0.0',
@@ -56,7 +56,7 @@ class JsonReporter {
 
   /// Generate JSON report for a test group
   Map<String, dynamic> generateGroupReport(
-    String groupName, 
+    String groupName,
     List<TestResult> results, {
     String? description,
     bool stopOnFailure = false,
@@ -85,21 +85,27 @@ class JsonReporter {
           'passed': passed,
           'failed': failed,
           'skipped': skipped,
-          'successRate': results.isEmpty ? 0.0 : (passed / results.length * 100),
+          'successRate': results.isEmpty
+              ? 0.0
+              : (passed / results.length * 100),
           'duration': {
             'totalMs': totalDuration.inMilliseconds,
             'totalSeconds': totalDuration.inSeconds,
-            'averageMs': results.isEmpty ? 0 : totalDuration.inMilliseconds ~/ results.length,
+            'averageMs': results.isEmpty
+                ? 0
+                : totalDuration.inMilliseconds ~/ results.length,
           },
         },
         'tests': results.map((result) => _convertTestResult(result)).toList(),
         'failedTests': results
             .where((r) => r.status == TestStatus.failed)
-            .map((r) => {
-              'name': r.suiteName,
-              'error': r.error,
-              'duration': r.totalDuration.inMilliseconds,
-            })
+            .map(
+              (r) => {
+                'name': r.suiteName,
+                'error': r.error,
+                'duration': r.totalDuration.inMilliseconds,
+              },
+            )
             .toList(),
       },
       'timestamp': DateTime.now().toIso8601String(),
@@ -108,14 +114,21 @@ class JsonReporter {
   }
 
   /// Generate comprehensive execution report
-  Map<String, dynamic> generateExecutionReport(List<TestResult> allResults, {
+  Map<String, dynamic> generateExecutionReport(
+    List<TestResult> allResults, {
     String? executionId,
     Map<String, dynamic>? environment,
     Map<String, dynamic>? configuration,
   }) {
-    final passed = allResults.where((r) => r.status == TestStatus.passed).length;
-    final failed = allResults.where((r) => r.status == TestStatus.failed).length;
-    final skipped = allResults.where((r) => r.status == TestStatus.skipped).length;
+    final passed = allResults
+        .where((r) => r.status == TestStatus.passed)
+        .length;
+    final failed = allResults
+        .where((r) => r.status == TestStatus.failed)
+        .length;
+    final skipped = allResults
+        .where((r) => r.status == TestStatus.skipped)
+        .length;
     final totalDuration = allResults.fold<Duration>(
       Duration.zero,
       (sum, result) => sum + result.totalDuration,
@@ -124,22 +137,32 @@ class JsonReporter {
     final report = {
       'testExecution': {
         'id': executionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        'startTime': allResults.isEmpty ? null : 
-                    allResults.map((r) => r.startTime).reduce((a, b) => a.isBefore(b) ? a : b).toIso8601String(),
+        'startTime': allResults.isEmpty
+            ? null
+            : allResults
+                  .map((r) => r.startTime)
+                  .reduce((a, b) => a.isBefore(b) ? a : b)
+                  .toIso8601String(),
         'endTime': DateTime.now().toIso8601String(),
         'summary': {
           'totalTests': allResults.length,
           'passed': passed,
           'failed': failed,
           'skipped': skipped,
-          'successRate': allResults.isEmpty ? 0.0 : (passed / allResults.length * 100),
+          'successRate': allResults.isEmpty
+              ? 0.0
+              : (passed / allResults.length * 100),
           'duration': {
             'totalMs': totalDuration.inMilliseconds,
             'totalSeconds': totalDuration.inSeconds,
-            'averageMs': allResults.isEmpty ? 0 : totalDuration.inMilliseconds ~/ allResults.length,
+            'averageMs': allResults.isEmpty
+                ? 0
+                : totalDuration.inMilliseconds ~/ allResults.length,
           },
         },
-        'results': allResults.map((result) => _convertTestResult(result)).toList(),
+        'results': allResults
+            .map((result) => _convertTestResult(result))
+            .toList(),
         'statistics': {
           'fastestTest': _getFastestTest(allResults),
           'slowestTest': _getSlowestTest(allResults),
@@ -158,7 +181,7 @@ class JsonReporter {
 
   /// Save report to file or print to console
   Future<void> outputReport(Map<String, dynamic> report) async {
-    final jsonString = prettyPrint 
+    final jsonString = prettyPrint
         ? const JsonEncoder.withIndent('  ').convert(report)
         : jsonEncode(report);
 
@@ -172,7 +195,8 @@ class JsonReporter {
   }
 
   /// Save multiple reports (useful for CI/CD artifacts)
-  Future<void> saveReports(List<TestResult> results, {
+  Future<void> saveReports(
+    List<TestResult> results, {
     String? baseFilename,
     Map<String, dynamic>? environment,
   }) async {
@@ -183,24 +207,37 @@ class JsonReporter {
     for (int i = 0; i < results.length; i++) {
       final report = generateTestReport(results[i]);
       final filename = '${base}-test-${i + 1}.json';
-      await JsonReporter(outputFile: filename, prettyPrint: prettyPrint).outputReport(report);
+      await JsonReporter(
+        outputFile: filename,
+        prettyPrint: prettyPrint,
+      ).outputReport(report);
     }
 
     // Execution summary report
-    final summaryReport = generateExecutionReport(results, environment: environment);
+    final summaryReport = generateExecutionReport(
+      results,
+      environment: environment,
+    );
     final summaryFilename = '$base-summary.json';
-    await JsonReporter(outputFile: summaryFilename, prettyPrint: prettyPrint).outputReport(summaryReport);
+    await JsonReporter(
+      outputFile: summaryFilename,
+      prettyPrint: prettyPrint,
+    ).outputReport(summaryReport);
   }
 
   /// Convert StepResult list to JSON-serializable format
   List<Map<String, dynamic>> _convertStepResults(List<StepResult> steps) {
-    return steps.map((step) => {
-      'success': step.success,
-      'duration': step.duration.inMilliseconds,
-      'message': step.message,
-      'error': step.error,
-      if (step.data != null) 'data': step.data,
-    }).toList();
+    return steps
+        .map(
+          (step) => {
+            'success': step.success,
+            'duration': step.duration.inMilliseconds,
+            'message': step.message,
+            'error': step.error,
+            if (step.data != null) 'data': step.data,
+          },
+        )
+        .toList();
   }
 
   /// Convert TestResult to JSON-serializable format
@@ -213,37 +250,41 @@ class JsonReporter {
       'duration': result.totalDuration.inMilliseconds,
       'error': result.error,
       'cleanupError': result.cleanupError,
-      if (includeStepDetails) 'stepCounts': {
-        'setup': result.setupResults.length,
-        'test': result.testResults.length,
-        'cleanup': result.cleanupResults.length,
-        'successful': _countSuccessfulSteps(result),
-        'failed': _countFailedSteps(result),
-      },
+      if (includeStepDetails)
+        'stepCounts': {
+          'setup': result.setupResults.length,
+          'test': result.testResults.length,
+          'cleanup': result.cleanupResults.length,
+          'successful': _countSuccessfulSteps(result),
+          'failed': _countFailedSteps(result),
+        },
     };
   }
 
   /// Count successful steps in a test result
   int _countSuccessfulSteps(TestResult result) {
     return result.setupResults.where((s) => s.success).length +
-           result.testResults.where((s) => s.success).length +
-           result.cleanupResults.where((s) => s.success).length;
+        result.testResults.where((s) => s.success).length +
+        result.cleanupResults.where((s) => s.success).length;
   }
 
   /// Count failed steps in a test result
   int _countFailedSteps(TestResult result) {
     return result.setupResults.where((s) => !s.success).length +
-           result.testResults.where((s) => !s.success).length +
-           result.cleanupResults.where((s) => !s.success).length;
+        result.testResults.where((s) => !s.success).length +
+        result.cleanupResults.where((s) => !s.success).length;
   }
 
   /// Get the fastest test from results
   Map<String, dynamic>? _getFastestTest(List<TestResult> results) {
     if (results.isEmpty) return null;
-    
-    final fastest = results.reduce((a, b) => 
-        a.totalDuration.inMilliseconds < b.totalDuration.inMilliseconds ? a : b);
-    
+
+    final fastest = results.reduce(
+      (a, b) => a.totalDuration.inMilliseconds < b.totalDuration.inMilliseconds
+          ? a
+          : b,
+    );
+
     return {
       'name': fastest.suiteName,
       'duration': fastest.totalDuration.inMilliseconds,
@@ -253,10 +294,13 @@ class JsonReporter {
   /// Get the slowest test from results
   Map<String, dynamic>? _getSlowestTest(List<TestResult> results) {
     if (results.isEmpty) return null;
-    
-    final slowest = results.reduce((a, b) => 
-        a.totalDuration.inMilliseconds > b.totalDuration.inMilliseconds ? a : b);
-    
+
+    final slowest = results.reduce(
+      (a, b) => a.totalDuration.inMilliseconds > b.totalDuration.inMilliseconds
+          ? a
+          : b,
+    );
+
     return {
       'name': slowest.suiteName,
       'duration': slowest.totalDuration.inMilliseconds,
@@ -266,33 +310,37 @@ class JsonReporter {
   /// Get test with most steps
   Map<String, dynamic>? _getTestWithMostSteps(List<TestResult> results) {
     if (results.isEmpty) return null;
-    
+
     final mostSteps = results.reduce((a, b) {
-      final aSteps = a.setupResults.length + a.testResults.length + a.cleanupResults.length;
-      final bSteps = b.setupResults.length + b.testResults.length + b.cleanupResults.length;
+      final aSteps =
+          a.setupResults.length +
+          a.testResults.length +
+          a.cleanupResults.length;
+      final bSteps =
+          b.setupResults.length +
+          b.testResults.length +
+          b.cleanupResults.length;
       return aSteps > bSteps ? a : b;
     });
-    
-    final stepCount = mostSteps.setupResults.length + 
-                     mostSteps.testResults.length + 
-                     mostSteps.cleanupResults.length;
-    
-    return {
-      'name': mostSteps.suiteName,
-      'stepCount': stepCount,
-    };
+
+    final stepCount =
+        mostSteps.setupResults.length +
+        mostSteps.testResults.length +
+        mostSteps.cleanupResults.length;
+
+    return {'name': mostSteps.suiteName, 'stepCount': stepCount};
   }
 
   /// Analyze common error patterns
   Map<String, int> _analyzeErrorPatterns(List<TestResult> results) {
     final errorPatterns = <String, int>{};
-    
+
     for (final result in results) {
       if (result.error != null) {
         // Extract error type from error message
         final error = result.error!;
         String pattern;
-        
+
         if (error.contains('TimeoutException')) {
           pattern = 'timeout';
         } else if (error.contains('AssertionError')) {
@@ -306,11 +354,11 @@ class JsonReporter {
         } else {
           pattern = 'unknown';
         }
-        
+
         errorPatterns[pattern] = (errorPatterns[pattern] ?? 0) + 1;
       }
     }
-    
+
     return errorPatterns;
   }
 
@@ -318,25 +366,33 @@ class JsonReporter {
   String generateJUnitXml(List<TestResult> results) {
     final totalTests = results.length;
     final failures = results.where((r) => r.status == TestStatus.failed).length;
-    final totalTime = results.fold<Duration>(
-      Duration.zero,
-      (sum, result) => sum + result.totalDuration,
-    ).inSeconds;
+    final totalTime = results
+        .fold<Duration>(
+          Duration.zero,
+          (sum, result) => sum + result.totalDuration,
+        )
+        .inSeconds;
 
     final buffer = StringBuffer();
     buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
-    buffer.writeln('<testsuite name="FlutterTestPilot" tests="$totalTests" failures="$failures" time="$totalTime">');
+    buffer.writeln(
+      '<testsuite name="FlutterTestPilot" tests="$totalTests" failures="$failures" time="$totalTime">',
+    );
 
     for (final result in results) {
       final time = result.totalDuration.inSeconds;
       buffer.writeln('  <testcase name="${result.suiteName}" time="$time">');
-      
+
       if (result.status == TestStatus.failed) {
-        buffer.writeln('    <failure message="${result.error ?? 'Unknown error'}">');
-        buffer.writeln('      ${result.error ?? 'Test failed without specific error message'}');
+        buffer.writeln(
+          '    <failure message="${result.error ?? 'Unknown error'}">',
+        );
+        buffer.writeln(
+          '      ${result.error ?? 'Test failed without specific error message'}',
+        );
         buffer.writeln('    </failure>');
       }
-      
+
       buffer.writeln('  </testcase>');
     }
 

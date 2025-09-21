@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'apis_observer.dart';
 import 'model/api_call_data.dart';
 import 'model/api_test_result.dart';
+
 /// HTTP Interceptor for Dio to capture API calls
 class ApiObserverInterceptor extends Interceptor {
   @override
@@ -39,6 +40,7 @@ class ApiObserverInterceptor extends Interceptor {
     );
   }
 }
+
 /// Singleton manager for API observation and testing
 class ApiObserverManager {
   static final ApiObserverManager _instance = ApiObserverManager._internal();

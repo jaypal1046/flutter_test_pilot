@@ -14,7 +14,12 @@ class Navigate extends TestAction {
   final Object? arguments;
   final bool replace;
 
-  const Navigate._({this.route, this.pageType, this.arguments, this.replace = false});
+  const Navigate._({
+    this.route,
+    this.pageType,
+    this.arguments,
+    this.replace = false,
+  });
 
   /// Navigate to a named route
   factory Navigate.to(String route, {Object? arguments}) {
@@ -23,7 +28,7 @@ class Navigate extends TestAction {
 
   /// Navigate to a specific page type
   factory Navigate.toPage({Object? arguments}) {
-  return Navigate._(pageType: Widget, arguments: arguments);
+    return Navigate._(pageType: Widget, arguments: arguments);
   }
 
   /// Replace current route
@@ -58,7 +63,10 @@ class Navigate extends TestAction {
       );
     } catch (e) {
       stopwatch.stop();
-      return StepResult.failure('Navigation failed: $e', duration: stopwatch.elapsed);
+      return StepResult.failure(
+        'Navigation failed: $e',
+        duration: stopwatch.elapsed,
+      );
     }
   }
 
@@ -84,7 +92,10 @@ class _NavigateBack extends Navigate {
       );
     } catch (e) {
       stopwatch.stop();
-      return StepResult.failure('Navigate back failed: $e', duration: stopwatch.elapsed);
+      return StepResult.failure(
+        'Navigate back failed: $e',
+        duration: stopwatch.elapsed,
+      );
     }
   }
 

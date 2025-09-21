@@ -2,13 +2,14 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import '../flutter_test_pilot.dart';
+
 class TestPilotRunner {
   /// Helper to run a single suite within a testWidgets
   static Future<void> runSuite(
-      WidgetTester tester,
-      TestSuite suite, {
-        bool expectSuccess = true,
-      }) async {
+    WidgetTester tester,
+    TestSuite suite, {
+    bool expectSuccess = true,
+  }) async {
     FlutterTestPilot.initialize(tester);
 
     final result = await FlutterTestPilot.instance.runSuite(suite);
@@ -20,10 +21,10 @@ class TestPilotRunner {
 
   /// Helper to run a group within a testWidgets
   static Future<void> runGroup(
-      WidgetTester tester,
-      TestGroup group, {
-        bool expectAllSuccess = true,
-      }) async {
+    WidgetTester tester,
+    TestGroup group, {
+    bool expectAllSuccess = true,
+  }) async {
     FlutterTestPilot.initialize(tester);
 
     final results = await FlutterTestPilot.instance.runGroup(group);

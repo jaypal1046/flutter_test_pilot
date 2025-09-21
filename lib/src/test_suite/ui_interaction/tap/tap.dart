@@ -4,12 +4,7 @@ import '../../step_result.dart';
 import '../../test_action.dart';
 
 /// Enum to represent different tap gesture types
-enum GestureType {
-  singleTap,
-  doubleTap,
-  tripleTap,
-  longPress,
-}
+enum GestureType { singleTap, doubleTap, tripleTap, longPress }
 
 /// Base class for tap-related actions
 abstract class TapAction extends TestAction {
@@ -28,7 +23,11 @@ abstract class TapAction extends TestAction {
   });
 
   /// Tap widget by text content
-  factory TapAction.text(String text, {TapContext? context, GestureType gestureType = GestureType.singleTap}) {
+  factory TapAction.text(
+    String text, {
+    TapContext? context,
+    GestureType gestureType = GestureType.singleTap,
+  }) {
     return _TapActionImpl(
       widgetText: text,
       context: context,
@@ -37,7 +36,11 @@ abstract class TapAction extends TestAction {
   }
 
   /// Tap widget by key
-  factory TapAction.key(String key, {TapContext? context, GestureType gestureType = GestureType.singleTap}) {
+  factory TapAction.key(
+    String key, {
+    TapContext? context,
+    GestureType gestureType = GestureType.singleTap,
+  }) {
     return _TapActionImpl(
       widgetKey: key,
       context: context,
@@ -46,7 +49,11 @@ abstract class TapAction extends TestAction {
   }
 
   /// Tap widget by identifier (text or type)
-  factory TapAction.widget(String text, {TapContext? context, GestureType gestureType = GestureType.singleTap}) {
+  factory TapAction.widget(
+    String text, {
+    TapContext? context,
+    GestureType gestureType = GestureType.singleTap,
+  }) {
     return _TapActionImpl(
       widgetText: text,
       context: context,
@@ -112,12 +119,16 @@ abstract class TapAction extends TestAction {
       stopwatch.stop();
 
       return StepResult.success(
-        message: '${gestureType.name} on ${widgetText ?? widgetKey ?? widgetType}',
+        message:
+            '${gestureType.name} on ${widgetText ?? widgetKey ?? widgetType}',
         duration: stopwatch.elapsed,
       );
     } catch (e) {
       stopwatch.stop();
-      return StepResult.failure('${gestureType.name} failed: $e', duration: stopwatch.elapsed);
+      return StepResult.failure(
+        '${gestureType.name} failed: $e',
+        duration: stopwatch.elapsed,
+      );
     }
   }
 
@@ -134,11 +145,15 @@ abstract class TapAction extends TestAction {
     } else if (widgetType != null) {
       finder = find.byType(widgetType!);
     } else {
-      throw Exception('Must specify either text, key, or type for ${gestureType.name} action');
+      throw Exception(
+        'Must specify either text, key, or type for ${gestureType.name} action',
+      );
     }
 
     if (tester.widgetList(finder).isEmpty) {
-      throw Exception('No widget found for ${gestureType.name} with ${widgetText ?? widgetKey ?? widgetType}');
+      throw Exception(
+        'No widget found for ${gestureType.name} with ${widgetText ?? widgetKey ?? widgetType}',
+      );
     }
 
     return finder;
@@ -156,8 +171,10 @@ abstract class TapAction extends TestAction {
           if (index != null && index < tester.widgetList(finder).length) {
             return finder.at(index);
           }
-          throw Exception('Invalid position "${context!.position}" for ${gestureType.name}. '
-              'Use "first", "last", or a valid index.');
+          throw Exception(
+            'Invalid position "${context!.position}" for ${gestureType.name}. '
+            'Use "first", "last", or a valid index.',
+          );
       }
     }
 
@@ -166,7 +183,9 @@ abstract class TapAction extends TestAction {
       final contextFinder = find.ancestor(
         of: finder,
         matching: find.byWidgetPredicate(
-          (widget) => widget.toString().toLowerCase().contains(context!.contextDescription!.toLowerCase()),
+          (widget) => widget.toString().toLowerCase().contains(
+            context!.contextDescription!.toLowerCase(),
+          ),
         ),
       );
       if (tester.widgetList(contextFinder).isNotEmpty) {
@@ -184,7 +203,8 @@ Example: TapAction.widget("Submit").inContext("Policy Info")
   }
 
   @override
-  String get description => '${gestureType.name} ${widgetText ?? widgetKey ?? widgetType}';
+  String get description =>
+      '${gestureType.name} ${widgetText ?? widgetKey ?? widgetType}';
 }
 
 class _TapActionImpl extends TapAction {
@@ -207,44 +227,44 @@ class TapContext {
 /// Convenience methods for specific tap actions
 class Tap extends TapAction {
   Tap.text(String text, {super.context})
-      : super._(widgetText: text, gestureType: GestureType.singleTap);
+    : super._(widgetText: text, gestureType: GestureType.singleTap);
 
   Tap.key(String key, {super.context})
-      : super._(widgetKey: key, gestureType: GestureType.singleTap);
+    : super._(widgetKey: key, gestureType: GestureType.singleTap);
 
   Tap.widget(String text, {super.context})
-      : super._(widgetText: text, gestureType: GestureType.singleTap);
+    : super._(widgetText: text, gestureType: GestureType.singleTap);
 }
 
 class DoubleTap extends TapAction {
   DoubleTap.text(String text, {super.context})
-      : super._(widgetText: text, gestureType: GestureType.doubleTap);
+    : super._(widgetText: text, gestureType: GestureType.doubleTap);
 
   DoubleTap.key(String key, {super.context})
-      : super._(widgetKey: key, gestureType: GestureType.doubleTap);
+    : super._(widgetKey: key, gestureType: GestureType.doubleTap);
 
   DoubleTap.widget(String text, {super.context})
-      : super._(widgetText: text, gestureType: GestureType.doubleTap);
+    : super._(widgetText: text, gestureType: GestureType.doubleTap);
 }
 
 class TripleTap extends TapAction {
   TripleTap.text(String text, {super.context})
-      : super._(widgetText: text, gestureType: GestureType.tripleTap);
+    : super._(widgetText: text, gestureType: GestureType.tripleTap);
 
   TripleTap.key(String key, {super.context})
-      : super._(widgetKey: key, gestureType: GestureType.tripleTap);
+    : super._(widgetKey: key, gestureType: GestureType.tripleTap);
 
   TripleTap.widget(String text, {super.context})
-      : super._(widgetText: text, gestureType: GestureType.tripleTap);
+    : super._(widgetText: text, gestureType: GestureType.tripleTap);
 }
 
 class LongPress extends TapAction {
   LongPress.text(String text, {super.context})
-      : super._(widgetText: text, gestureType: GestureType.longPress);
+    : super._(widgetText: text, gestureType: GestureType.longPress);
 
   LongPress.key(String key, {super.context})
-      : super._(widgetKey: key, gestureType: GestureType.longPress);
+    : super._(widgetKey: key, gestureType: GestureType.longPress);
 
   LongPress.widget(String text, {super.context})
-      : super._(widgetText: text, gestureType: GestureType.longPress);
+    : super._(widgetText: text, gestureType: GestureType.longPress);
 }
