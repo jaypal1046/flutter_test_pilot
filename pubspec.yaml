@@ -1,6 +1,6 @@
 name: flutter_test_pilot
 description: "A comprehensive, fluent testing framework for Flutter applications that makes UI testing intuitive and maintainable. Supports widget testing, integration testing, and automated test generation."
-version: 1.0.1
+version: 1.0.2
 homepage: https://github.com/jaypal1046/flutter_test_pilot
 repository: https://github.com/jaypal1046/flutter_test_pilot.git
 issue_tracker: https://github.com/jaypal1046/flutter_test_pilot/issues
