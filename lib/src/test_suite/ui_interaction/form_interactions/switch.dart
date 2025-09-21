@@ -1,4 +1,4 @@
-import 'dart:ui' as ui;
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -316,16 +316,16 @@ Example: SwitchAction.byText("Dark Mode").inContainer("Settings")
       if (semantics != null) {
         // Check if switch is checked/unchecked in semantics using flagsCollection
         // Convert CheckedState to bool
-        final checkedState = semantics.flagsCollection.isChecked;
+        final checkedState = semantics.flagsCollection.isChecked.value;
         switch (checkedState) {
-          case ui.CheckedState.isTrue:
+          case 1:
             return true;
-          case ui.CheckedState.isFalse:
+          case 2:
             return false;
-          case ui.CheckedState.mixed:
+          case 3:
             // Handle mixed state - you might want to treat this differently
             return false; // or true, depending on your needs
-          case ui.CheckedState.none:
+          case 0:
             return false;
         }
       }
