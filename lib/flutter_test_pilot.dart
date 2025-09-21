@@ -39,7 +39,7 @@ export 'package:flutter_test_pilot/src/test_suite/ui_interaction/advanced_gestur
 
 export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/checkbox.dart';
 export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/radio.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/slider.dart';
+export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/slider_s.dart';
 export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/switch.dart';
 export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/dropdown.dart';
 // export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/date_picker.dart
