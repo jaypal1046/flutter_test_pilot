@@ -11,6 +11,9 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+flutter_test_pilot.iml
+pubspec.lock
+
 
 # IntelliJ related
 *.iml
