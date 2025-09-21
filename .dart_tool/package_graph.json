@@ -9,11 +9,11 @@
       "dependencies": [
         "dio",
         "flutter",
+        "flutter_test",
         "integration_test"
       ],
       "devDependencies": [
-        "flutter_lints",
-        "flutter_test"
+        "flutter_lints"
       ]
     },
     {
