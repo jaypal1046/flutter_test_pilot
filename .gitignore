@@ -13,6 +13,8 @@ pubspec.lock
 # Example directory lock file (common in package development)
 example/pubspec.lock
 
+flutter_test_pilot.iml
+
 # Directory created by dartdoc
 # If you don't generate docs locally you can remove this line.
 doc/api/
@@ -123,3 +125,4 @@ web/
 
 # Misc
 .fvm/
+
