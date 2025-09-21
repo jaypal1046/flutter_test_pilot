@@ -303,7 +303,6 @@
 // ''');
 //   }
 
-
 //   bool _shouldToggleSwitch(bool currentState) {
 //     if (actionType == SwitchActionType.toggle) {
 //       return true; // Always toggle
