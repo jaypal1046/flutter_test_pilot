@@ -311,13 +311,9 @@ Example: SwitchAction.byText("Dark Mode").inContainer("Settings")
       final semantics = element.renderObject?.debugSemantics;
 
       if (semantics != null) {
-        // Check if switch is checked/unchecked in semantics
-        final hasCheckedState = semantics.hasFlag(
-          SemanticsFlag.hasCheckedState,
-        );
-        if (hasCheckedState) {
-          return semantics.hasFlag(SemanticsFlag.isChecked);
-        }
+        // Check if switch is checked/unchecked in semantics using flagsCollection
+
+        return semantics.flagsCollection.isChecked;
       }
 
       // Fallback: Try to get widget and cast to specific types
