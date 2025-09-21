@@ -1,4 +1,4 @@
-import '../api_checker.dart';
+import '../apis_checker.dart';
 import '../model/api_validation_result.dart';
 
 /// Integer type checker with optional min/max validation

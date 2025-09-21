@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../step_result.dart';
 import '../../test_action.dart';
-import '../advanced_gestures/scroll/scroll.dart';
+import '../advanced_gestures/scroll.dart';
 
 
 /// Checkbox interaction action that uses tap and scroll gestures

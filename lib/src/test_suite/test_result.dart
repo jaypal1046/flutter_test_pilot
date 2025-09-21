@@ -1,6 +1,6 @@
 import 'step_result.dart';
 import 'test_status.dart';
-
+enum TestPhase { setup, test, apis, cleanup }
 /// Overall test result
 class TestResult {
   final String suiteName;
@@ -15,18 +15,18 @@ class TestResult {
 
   TestResult({required this.suiteName});
 
-  void addStepResult(String phase, StepResult result) {
+  void addStepResult(TestPhase phase, StepResult result) {
     switch (phase) {
-      case 'setup':
+      case TestPhase.setup:
         setupResults.add(result);
         break;
-      case 'test':
+      case TestPhase.test:
         testResults.add(result);
         break;
-      case 'cleanup':
+      case TestPhase.cleanup:
         cleanupResults.add(result);
         break;
-      case 'apis':
+      case TestPhase.apis:
         cleanupResults.add(result);
         break;  
     }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../step_result.dart';
 import '../../test_action.dart';
-import '../advanced_gestures/scroll/scroll.dart';
+import '../advanced_gestures/scroll.dart';
 import '../tap/tap.dart';
 
 /// Dropdown value selection action that combines tap and scroll gestures

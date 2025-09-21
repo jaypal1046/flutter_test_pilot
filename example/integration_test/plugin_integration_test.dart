@@ -13,9 +13,8 @@ void main() {
     testWidgets('Simple App Launch Test', (WidgetTester tester) async {
       await tester.pumpWidget(MyApp());
       await tester.pumpAndSettle(Duration(seconds: 10));
-      final navigatorKey = TestPilotNavigator.navigatorKey;
-      FlutterTestPilot.initialize(navigatorKey);
-      FlutterTestPilot.setTester(tester);
+      FlutterTestPilot.initialize(tester);
+
       expect(find.byType(MaterialApp), findsOneWidget);
       expect(TestPilotNavigator.isReady, isTrue);
 
@@ -32,10 +31,7 @@ void main() {
           // SetupMockServer(),
         ],
 
-        steps: [
-          Tap.text("Go to Claims Page")
-        
-        ],
+        steps: [Tap.text("Go to Claims Page")],
 
         cleanup: [
           // Actions to run after test

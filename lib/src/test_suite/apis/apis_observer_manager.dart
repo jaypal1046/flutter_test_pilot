@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 
-import 'api_observer.dart';
+import 'apis_observer.dart';
 import 'model/api_call_data.dart';
 import 'model/api_test_result.dart';
 /// HTTP Interceptor for Dio to capture API calls

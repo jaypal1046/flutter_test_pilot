@@ -1,5 +1,5 @@
 
-import '../api_checker.dart';
+import '../apis_checker.dart';
 import '../model/api_validation_result.dart';
 
 /// String type checker with optional length and pattern validation

@@ -61,14 +61,9 @@ void main() {
 
         print('✅ App settled');
 
-        // Get navigator key
-        print('⏳ Getting navigator key...');
-        final navigatorKey = TestPilotNavigator.navigatorKey;
-        print('✅ Navigator key obtained');
-
         // Initialize Test Pilot
         print('⏳ Initializing Test Pilot...');
-        FlutterTestPilot.initialize(navigatorKey);
+        FlutterTestPilot.initialize(tester);
         print('✅ Test Pilot initialized');
 
         // Create simple test suite first

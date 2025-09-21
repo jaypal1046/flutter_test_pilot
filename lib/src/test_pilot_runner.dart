@@ -9,7 +9,7 @@ class TestPilotRunner {
       TestSuite suite, {
         bool expectSuccess = true,
       }) async {
-    FlutterTestPilot.setTester(tester);
+    FlutterTestPilot.initialize(tester);
 
     final result = await FlutterTestPilot.instance.runSuite(suite);
 
@@ -24,7 +24,7 @@ class TestPilotRunner {
       TestGroup group, {
         bool expectAllSuccess = true,
       }) async {
-    FlutterTestPilot.setTester(tester);
+    FlutterTestPilot.initialize(tester);
 
     final results = await FlutterTestPilot.instance.runGroup(group);
 
