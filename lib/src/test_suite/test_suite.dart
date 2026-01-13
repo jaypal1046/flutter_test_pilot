@@ -180,7 +180,7 @@ class TestSuite {
         // Add delay between actions with BOUNDED pumping instead of pumpAndSettle
         if (i < actions.length - 1) {
           await Future.delayed(config.actionDelay);
-          
+
           // CRITICAL FIX: Use bounded pump instead of pumpAndSettle
           // pumpAndSettle can hang indefinitely if there are continuous animations
           try {

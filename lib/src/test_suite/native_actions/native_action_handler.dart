@@ -74,7 +74,7 @@ class NativeActionHandler {
       // Priority handling order:
       // 🔥 HIGHEST PRIORITY: Phone picker bottom sheet (blocks UI completely)
       await _handlePhonePickerBottomSheet(tester);
-      
+
       // 1. Bottom sheets (most common for permissions on mobile)
       await _handleBottomSheets(tester);
 
@@ -122,15 +122,15 @@ class NativeActionHandler {
 
     for (final text in phonePickerTexts) {
       final textFinder = find.textContaining(text, skipOffstage: false);
-      
+
       if (tester.any(textFinder)) {
         final sheetKey = 'phone-picker-sheet';
-        
+
         if (!_handledDialogs.contains(sheetKey)) {
           print('📱🔥 CRITICAL: Phone picker bottom sheet detected!');
-          
+
           bool sheetClosed = false;
-          
+
           // Strategy 1: Close button
           final closeButton = find.byIcon(Icons.close, skipOffstage: false);
           if (tester.any(closeButton)) {
@@ -141,7 +141,7 @@ class NativeActionHandler {
               if (sheetClosed) print('   ✅ Closed via close button');
             }
           }
-          
+
           // Strategy 2: Tap barrier (outside sheet)
           if (!sheetClosed) {
             try {
@@ -156,7 +156,7 @@ class NativeActionHandler {
               // Continue to next strategy
             }
           }
-          
+
           // Strategy 3: Back button
           if (!sheetClosed) {
             try {
@@ -169,7 +169,7 @@ class NativeActionHandler {
               // Continue to next strategy
             }
           }
-          
+
           if (sheetClosed) {
             _handledDialogs.add(sheetKey);
             // Stabilize UI
@@ -180,7 +180,7 @@ class NativeActionHandler {
           } else {
             print('❌ WARNING: Could not dismiss phone picker sheet');
           }
-          
+
           return;
         }
       }
