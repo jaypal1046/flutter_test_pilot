@@ -1,49 +1,58 @@
-// test_pilot.dart - Main entry point for Test Pilot
-export 'package:flutter_test_pilot/src/test_pilot_runner.dart';
-export 'package:flutter_test_pilot/src/nav/global_nav.dart';
-export 'package:flutter_test_pilot/src/test_suite/step_result.dart';
-export 'package:flutter_test_pilot/src/test_suite/test_action.dart';
-export 'package:flutter_test_pilot/src/test_suite/test_result.dart';
-export 'package:flutter_test_pilot/src/test_suite/test_status.dart';
-export 'package:flutter_test_pilot/src/test_suite/test_suite.dart';
-export 'package:flutter_test_pilot/src/test_suite/nav_action/navgator.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/tap/tap.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/type/type.dart';
-export 'package:flutter_test_pilot/src/test_suite/wait_action/wait_action.dart';
+library flutter_test_pilot;
 
-export 'package:flutter_test_pilot/src/reporting/console_reporter.dart';
-export 'package:flutter_test_pilot/src/reporting/json_reporter.dart';
+// Core test runner
+export 'src/test_pilot_runner.dart';
 
-export 'package:flutter_test_pilot/src/test_suite/apis/apis_checker.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/apis_observer_manager.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/apis_observer.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/request_resonse_check.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/checker/any_checker.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/checker/bool_checker.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/checker/custom_checker.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/checker/int_checker.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/checker/list_checker.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/checker/object_checker.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/checker/string_checker.dart';
+// Test suite components
+export 'src/test_suite/test_suite.dart';
+export 'src/test_suite/test_action.dart';
+export 'src/test_suite/test_result.dart';
+export 'src/test_suite/test_status.dart';
+export 'src/test_suite/step_result.dart';
 
-export 'package:flutter_test_pilot/src/test_suite/apis/model/api_call_data.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/model/api_test_result.dart';
-export 'package:flutter_test_pilot/src/test_suite/apis/model/api_validation_result.dart';
+// Discovery
+export 'src/discovery/test_discovery.dart';
 
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/advanced_gestures/drag.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/advanced_gestures/scroll.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/advanced_gestures/pinch.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/advanced_gestures/drop.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/advanced_gestures/swipe.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/advanced_gestures/pen.dart';
+// Recording
+export 'src/recording/test_recorder.dart';
 
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/checkbox.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/radio.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/slider.dart';
-// export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/switch.dart';
-export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/dropdown.dart';
-// export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/date_picker.dart
-// export 'package:flutter_test_pilot/src/test_suite/ui_interaction/form_interactions/time_picker.dart';
+// Navigation
+export 'src/nav/global_nav.dart';
+
+// Reporting
+export 'src/reporting/ci_cd_reporter.dart';
+export 'src/reporting/console_reporter.dart';
+export 'src/reporting/json_reporter.dart';
+
+// UI Interactions
+export 'src/test_suite/ui_interaction/tap/tap.dart';
+export 'src/test_suite/ui_interaction/type/type.dart';
+
+// Wait actions
+export 'src/test_suite/wait_action/wait_action.dart';
+
+// Navigation actions
+export 'src/test_suite/nav_action/navigator.dart';
+
+// Advanced gestures
+export 'src/test_suite/ui_interaction/advanced_gestures/scroll.dart';
+
+// Native action handler
+export 'src/test_suite/native_actions/native_action_handler.dart';
+
+// Utilities
+export 'src/test_suite/utils/element_verifier.dart';
+
+// Assertions
+export 'src/test_suite/assertion_action/assertion_action.dart';
+
+// ✨ Test Generation
+export 'src/generation/code_analyzer.dart';
+export 'src/generation/test_generator.dart';
+export 'src/generation/test_templates.dart';
+export 'src/generation/auto_test_cli.dart'
+    hide TestGenerationStrategy; // Hide to avoid conflict
+export 'src/generation/flow_test_generator.dart'; // NEW: Flow-based generation
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -37,8 +37,8 @@ In your test file, set up the following:
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart'; // For Material widgets
-import 'path_to_your_tap_class.dart'; // e.g., 'package:your_test_actions/tap.dart'
-import 'main.dart'; // Your app entry point
+import '../../../../../test/lib/src/test_suite/ui_interaction/tap/path_to_your_tap_class.dart'; // e.g., 'package:your_test_actions/tap.dart'
+import '../../../../../test/lib/src/test_suite/ui_interaction/tap/main.dart'; // Your app entry point
 
 void main() {
   testWidgets('Test Tap class strategies', (WidgetTester tester) async {
@@ -292,8 +292,8 @@ class MyApp extends StatelessWidget {
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'path_to_your_tap_class.dart'; // Adjust path
-import 'main.dart';
+import '../../../../../test/lib/src/test_suite/ui_interaction/tap/path_to_your_tap_class.dart'; // Adjust path
+import '../../../../../test/lib/src/test_suite/ui_interaction/tap/main.dart';
 
 void main() {
   testWidgets('Test all Tap strategies', (WidgetTester tester) async {

@@ -2,9 +2,31 @@
 
 All notable changes to Flutter Test Pilot will be documented in this file.  
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-## [1.0.7]  - 2025-09-21
 
-- fix
+## [1.0.8] - 2026-01-13
+
+### Enhanced
+
+- **Independent Operation**: The package now operates completely independently without requiring prior knowledge of your application's internal flow or structure
+  - Works seamlessly with any Flutter application architecture
+  - No need for manual setup or configuration of routes and navigation
+  - Automatically discovers and interacts with UI elements using intelligent widget finding strategies
+  
+- **Live Data Integration Testing**: Verified and tested with real-world integration tests using live data
+  - Integration test suite validates real application flows (navigation, user interactions, API calls)
+  - Tested with actual Flutter apps including multi-page navigation scenarios
+  - Proven reliability in production-like testing environments
+  - Example integration tests demonstrate real-world use cases with HomePage, ClaimsPage, and ProfilePage navigation
+
+### Improved
+
+- Enhanced documentation explaining the framework's plug-and-play nature
+- Added comprehensive integration test examples in the example app
+- Improved test pilot navigator integration for seamless cross-page testing
+
+## [1.0.7] - 2025-09-21
+
+- Fix: Minor bug fixes and improvements
 
 
 

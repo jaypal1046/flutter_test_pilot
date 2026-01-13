@@ -15,8 +15,8 @@ In your test file:
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart'; // For Material widgets; add 'package:flutter/cupertino.dart' for Cupertino
-import 'path_to_your_type_class.dart'; // e.g., 'package:your_test_actions/type.dart'
-import 'main.dart'; // Your app entry point
+import '../../../../../test/lib/src/test_suite/ui_interaction/type/path_to_your_type_class.dart'; // e.g., 'package:your_test_actions/type.dart'
+import '../../../../../test/lib/src/test_suite/ui_interaction/type/main.dart'; // Your app entry point
 
 void main() {
   testWidgets('Cover all finding and typing strategies', (WidgetTester tester) async {

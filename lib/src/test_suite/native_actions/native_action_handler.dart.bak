@@ -1,0 +1,727 @@
+// =============================================================================
+// NATIVE ACTION HANDLER
+// Handles ANR, crashes, permissions, and native dialogs during tests
+// =============================================================================
+
+import 'dart:async';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import '../step_result.dart';
+
+/// Handles native platform actions like permissions, ANR, crashes
+class NativeActionHandler {
+  static final NativeActionHandler _instance = NativeActionHandler._internal();
+  static NativeActionHandler get instance => _instance;
+
+  NativeActionHandler._internal();
+
+  bool _isMonitoring = false;
+  Timer? _monitoringTimer;
+  final List<String> _handledDialogs = [];
+
+  /// Start monitoring for native dialogs and issues
+  void startMonitoring(WidgetTester tester) {
+    if (_isMonitoring) return;
+
+    _isMonitoring = true;
+    print('🛡️  Native Action Handler: Monitoring started');
+
+    // Check every 2 seconds for native dialogs
+    _monitoringTimer = Timer.periodic(
+      const Duration(seconds: 2),
+      (_) => _checkForNativeDialogs(tester),
+    );
+  }
+
+  /// Stop monitoring
+  void stopMonitoring() {
+    _isMonitoring = false;
+    _monitoringTimer?.cancel();
+    _monitoringTimer = null;
+    _handledDialogs.clear();
+    print('🛡️  Native Action Handler: Monitoring stopped');
+  }
+
+  /// Check for and handle native dialogs
+  Future<void> _checkForNativeDialogs(WidgetTester tester) async {
+    try {
+      // Handle permission dialogs
+      await _handlePermissionDialogs(tester);
+
+      // Handle system dialogs
+      await _handleSystemDialogs(tester);
+
+      // Check for ANR
+      await _checkForANR(tester);
+    } catch (e) {
+      // Silent catch - don't interrupt the test
+    }
+  }
+
+  /// Handle all types of permission dialogs
+  Future<void> _handlePermissionDialogs(WidgetTester tester) async {
+    final permissionTexts = [
+      // Location permissions
+      'allow',
+      'allow once',
+      'allow only while using the app',
+      'allow all the time',
+      'while using the app',
+      'precise location',
+
+      // Camera permissions
+      'allow camera',
+      'camera access',
+
+      // Microphone permissions
+      'allow microphone',
+      'microphone access',
+
+      // Storage permissions
+      'allow storage',
+      'allow photos',
+      'allow media',
+
+      // Notification permissions
+      'allow notifications',
+      'enable notifications',
+
+      // Contacts permissions
+      'allow contacts',
+
+      // Calendar permissions
+      'allow calendar',
+
+      // Generic
+      'ok',
+      'allow',
+      'yes',
+      'grant',
+      'accept',
+    ];
+
+    for (final text in permissionTexts) {
+      final finder = find.text(text, findRichText: true, skipOffstage: false);
+
+      if (tester.any(finder) && !_handledDialogs.contains(text)) {
+        print('🔐 Native Handler: Found permission dialog - "$text"');
+        try {
+          await tester.tap(finder, warnIfMissed: false);
+          // FIXED: Use bounded pump instead of pumpAndSettle
+          for (int i = 0; i < 5; i++) {
+            await tester.pump(const Duration(milliseconds: 200));
+          }
+          _handledDialogs.add(text);
+          print('✅ Native Handler: Granted permission - "$text"');
+        } catch (e) {
+          print('⚠️  Native Handler: Failed to tap "$text" - $e');
+        }
+      }
+    }
+
+    // Also search case-insensitively
+    await _handlePermissionDialogsCaseInsensitive(tester);
+  }
+
+  /// Handle permission dialogs with case-insensitive search
+  Future<void> _handlePermissionDialogsCaseInsensitive(
+    WidgetTester tester,
+  ) async {
+    final permissionPatterns = [
+      RegExp(r'allow', caseSensitive: false),
+      RegExp(r'grant', caseSensitive: false),
+      RegExp(r'permit', caseSensitive: false),
+      RegExp(r'ok', caseSensitive: false),
+      RegExp(r'yes', caseSensitive: false),
+      RegExp(r'accept', caseSensitive: false),
+      RegExp(r'continue', caseSensitive: false),
+    ];
+
+    final textFinder = find.byWidgetPredicate((widget) {
+      if (widget is Text) {
+        final text = widget.data?.toLowerCase() ?? '';
+        return permissionPatterns.any((pattern) => pattern.hasMatch(text));
+      }
+      return false;
+    });
+
+    if (tester.any(textFinder)) {
+      try {
+        await tester.tap(textFinder.first, warnIfMissed: false);
+        // FIXED: Use bounded pump instead of pumpAndSettle
+        for (int i = 0; i < 5; i++) {
+          await tester.pump(const Duration(milliseconds: 200));
+        }
+        print('✅ Native Handler: Granted permission (case-insensitive)');
+      } catch (e) {
+        // Ignore tap failures
+      }
+    }
+  }
+
+  /// Handle system dialogs (ANR, crash reports, etc.)
+  Future<void> _handleSystemDialogs(WidgetTester tester) async {
+    final systemDialogTexts = [
+      // ANR dialogs
+      'app isn\'t responding',
+      'application is not responding',
+      'wait',
+      'close app',
+
+      // Update dialogs
+      'update available',
+      'later',
+      'not now',
+      'skip',
+
+      // System alerts
+      'dismiss',
+      'close',
+      'cancel',
+
+      // Battery optimization
+      'don\'t optimize',
+      'allow',
+
+      // Accessibility
+      'got it',
+      'ok',
+    ];
+
+    for (final text in systemDialogTexts) {
+      final finder = find.text(text, findRichText: true, skipOffstage: false);
+
+      if (tester.any(finder) && !_handledDialogs.contains(text)) {
+        print('🔔 Native Handler: Found system dialog - "$text"');
+        try {
+          await tester.tap(finder, warnIfMissed: false);
+          // FIXED: Use bounded pump instead of pumpAndSettle
+          for (int i = 0; i < 5; i++) {
+            await tester.pump(const Duration(milliseconds: 200));
+          }
+          _handledDialogs.add(text);
+          print('✅ Native Handler: Dismissed dialog - "$text"');
+        } catch (e) {
+          print('⚠️  Native Handler: Failed to dismiss "$text" - $e');
+        }
+      }
+    }
+  }
+
+  /// Check for ANR (Application Not Responding)
+  Future<void> _checkForANR(WidgetTester tester) async {
+    // Look for ANR dialog indicators
+    final anrIndicators = [
+      'app isn\'t responding',
+      'application is not responding',
+      'android.app.anr',
+    ];
+
+    for (final indicator in anrIndicators) {
+      final finder = find.textContaining(
+        indicator,
+        findRichText: true,
+        skipOffstage: false,
+      );
+
+      if (tester.any(finder)) {
+        print('🚨 ANR DETECTED! Attempting recovery...');
+
+        // Try to tap "Wait" button
+        final waitFinder = find.text('wait', skipOffstage: false);
+        if (tester.any(waitFinder)) {
+          await tester.tap(waitFinder, warnIfMissed: false);
+          await tester.pumpAndSettle(const Duration(seconds: 2));
+          print('✅ ANR Handler: Tapped "Wait" button');
+        }
+
+        // If still showing, restart the app
+        if (tester.any(finder)) {
+          print('⚠️  ANR still present, attempting to close dialog');
+          await tester.pageBack();
+          await tester.pumpAndSettle(const Duration(seconds: 2));
+        }
+      }
+    }
+  }
+
+  /// Handle location permissions specifically
+  Future<StepResult> handleLocationPermission(WidgetTester tester) async {
+    final stopwatch = Stopwatch()..start();
+
+    print('📍 Handling location permission...');
+
+    try {
+      await tester.pumpAndSettle();
+
+      // Wait for permission dialog to appear
+      await Future.delayed(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+
+      // Try different location permission texts
+      final locationTexts = [
+        'Allow',
+        'Allow only while using the app',
+        'Allow all the time',
+        'While using the app',
+        'Only this time',
+      ];
+
+      bool permissionHandled = false;
+
+      for (final text in locationTexts) {
+        final finder = find.text(text, skipOffstage: false);
+        if (tester.any(finder)) {
+          await tester.tap(finder, warnIfMissed: false);
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+          permissionHandled = true;
+          print('✅ Location permission granted: $text');
+          break;
+        }
+      }
+
+      if (!permissionHandled) {
+        // Try tapping by widget type (button)
+        final buttonFinder = find.byWidgetPredicate(
+          (widget) =>
+              widget is ElevatedButton ||
+              widget is TextButton ||
+              widget is OutlinedButton,
+        );
+
+        if (tester.any(buttonFinder)) {
+          await tester.tap(buttonFinder.first, warnIfMissed: false);
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+          print('✅ Location permission granted via button');
+        }
+      }
+
+      stopwatch.stop();
+      return StepResult.success(
+        message: 'Location permission handled',
+        duration: stopwatch.elapsed,
+      );
+    } catch (e) {
+      stopwatch.stop();
+      return StepResult.failure(
+        'Failed to handle location permission: $e',
+        duration: stopwatch.elapsed,
+      );
+    }
+  }
+
+  /// Handle notification permission
+  Future<StepResult> handleNotificationPermission(WidgetTester tester) async {
+    final stopwatch = Stopwatch()..start();
+
+    print('🔔 Handling notification permission...');
+
+    try {
+      await tester.pumpAndSettle();
+      await Future.delayed(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+
+      final notificationTexts = [
+        'Allow',
+        'Enable notifications',
+        'Turn on notifications',
+        'OK',
+      ];
+
+      for (final text in notificationTexts) {
+        final finder = find.text(text, skipOffstage: false);
+        if (tester.any(finder)) {
+          await tester.tap(finder, warnIfMissed: false);
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+          print('✅ Notification permission granted: $text');
+          break;
+        }
+      }
+
+      stopwatch.stop();
+      return StepResult.success(
+        message: 'Notification permission handled',
+        duration: stopwatch.elapsed,
+      );
+    } catch (e) {
+      stopwatch.stop();
+      return StepResult.failure(
+        'Failed to handle notification permission: $e',
+        duration: stopwatch.elapsed,
+      );
+    }
+  }
+
+  /// Handle camera permission
+  Future<StepResult> handleCameraPermission(WidgetTester tester) async {
+    final stopwatch = Stopwatch()..start();
+
+    print('📷 Handling camera permission...');
+
+    try {
+      await tester.pumpAndSettle();
+      await Future.delayed(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+
+      final cameraTexts = [
+        'Allow',
+        'While using the app',
+        'Only this time',
+        'OK',
+      ];
+
+      for (final text in cameraTexts) {
+        final finder = find.text(text, skipOffstage: false);
+        if (tester.any(finder)) {
+          await tester.tap(finder, warnIfMissed: false);
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+          print('✅ Camera permission granted: $text');
+          break;
+        }
+      }
+
+      stopwatch.stop();
+      return StepResult.success(
+        message: 'Camera permission handled',
+        duration: stopwatch.elapsed,
+      );
+    } catch (e) {
+      stopwatch.stop();
+      return StepResult.failure(
+        'Failed to handle camera permission: $e',
+        duration: stopwatch.elapsed,
+      );
+    }
+  }
+
+  /// Handle storage permission
+  Future<StepResult> handleStoragePermission(WidgetTester tester) async {
+    final stopwatch = Stopwatch()..start();
+
+    print('💾 Handling storage permission...');
+
+    try {
+      await tester.pumpAndSettle();
+      await Future.delayed(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+
+      final storageTexts = [
+        'Allow',
+        'Allow access to photos and media',
+        'Allow access to media',
+        'OK',
+      ];
+
+      for (final text in storageTexts) {
+        final finder = find.text(text, skipOffstage: false);
+        if (tester.any(finder)) {
+          await tester.tap(finder, warnIfMissed: false);
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+          print('✅ Storage permission granted: $text');
+          break;
+        }
+      }
+
+      stopwatch.stop();
+      return StepResult.success(
+        message: 'Storage permission handled',
+        duration: stopwatch.elapsed,
+      );
+    } catch (e) {
+      stopwatch.stop();
+      return StepResult.failure(
+        'Failed to handle storage permission: $e',
+        duration: stopwatch.elapsed,
+      );
+    }
+  }
+
+  /// Handle all permissions at once (on app start)
+  Future<StepResult> handleAllStartupPermissions(WidgetTester tester) async {
+    final stopwatch = Stopwatch()..start();
+
+    print('🚀 Handling all startup permissions...');
+
+    try {
+      // Start monitoring in background
+      startMonitoring(tester);
+
+      // Wait for app to settle
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      // Try to handle any visible permission dialogs
+      await _handlePermissionDialogs(tester);
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // Handle system dialogs
+      await _handleSystemDialogs(tester);
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      stopwatch.stop();
+      return StepResult.success(
+        message: 'All startup permissions handled',
+        duration: stopwatch.elapsed,
+      );
+    } catch (e) {
+      stopwatch.stop();
+      return StepResult.failure(
+        'Failed to handle startup permissions: $e',
+        duration: stopwatch.elapsed,
+      );
+    }
+  }
+
+  /// Recover from ANR
+  Future<StepResult> recoverFromANR(WidgetTester tester) async {
+    final stopwatch = Stopwatch()..start();
+
+    print('🚨 Attempting ANR recovery...');
+
+    try {
+      // Check for ANR dialog
+      final anrFinder = find.textContaining(
+        'isn\'t responding',
+        findRichText: true,
+        skipOffstage: false,
+      );
+
+      if (tester.any(anrFinder)) {
+        // Try "Wait" button
+        final waitFinder = find.text('Wait', skipOffstage: false);
+        if (tester.any(waitFinder)) {
+          await tester.tap(waitFinder, warnIfMissed: false);
+          await tester.pumpAndSettle(const Duration(seconds: 3));
+          print('✅ Tapped "Wait" button');
+        } else {
+          // Try "OK" or "Close" button
+          final closeFinder = find.text('OK', skipOffstage: false);
+          if (tester.any(closeFinder)) {
+            await tester.tap(closeFinder, warnIfMissed: false);
+            await tester.pumpAndSettle(const Duration(seconds: 2));
+            print('✅ Tapped "OK" button');
+          }
+        }
+
+        stopwatch.stop();
+        return StepResult.success(
+          message: 'ANR recovered',
+          duration: stopwatch.elapsed,
+        );
+      } else {
+        stopwatch.stop();
+        return StepResult.success(
+          message: 'No ANR detected',
+          duration: stopwatch.elapsed,
+        );
+      }
+    } catch (e) {
+      stopwatch.stop();
+      return StepResult.failure(
+        'Failed to recover from ANR: $e',
+        duration: stopwatch.elapsed,
+      );
+    }
+  }
+
+  /// Handle app crash recovery
+  Future<StepResult> recoverFromCrash(WidgetTester tester) async {
+    final stopwatch = Stopwatch()..start();
+
+    print('💥 Attempting crash recovery...');
+
+    try {
+      // Check for crash dialog
+      final crashIndicators = [
+        'has stopped',
+        'has crashed',
+        'unfortunately',
+        'error',
+      ];
+
+      bool crashDetected = false;
+      for (final indicator in crashIndicators) {
+        final finder = find.textContaining(
+          indicator,
+          findRichText: true,
+          skipOffstage: false,
+        );
+
+        if (tester.any(finder)) {
+          crashDetected = true;
+          print('🚨 Crash detected: $indicator');
+
+          // Try to close the crash dialog
+          final closeFinder = find.text('Close', skipOffstage: false);
+          if (tester.any(closeFinder)) {
+            await tester.tap(closeFinder, warnIfMissed: false);
+            await tester.pumpAndSettle(const Duration(seconds: 2));
+          }
+
+          // Try "OK" button
+          final okFinder = find.text('OK', skipOffstage: false);
+          if (tester.any(okFinder)) {
+            await tester.tap(okFinder, warnIfMissed: false);
+            await tester.pumpAndSettle(const Duration(seconds: 2));
+          }
+
+          break;
+        }
+      }
+
+      stopwatch.stop();
+
+      if (crashDetected) {
+        return StepResult.success(
+          message: 'Crash dialog dismissed',
+          duration: stopwatch.elapsed,
+        );
+      } else {
+        return StepResult.success(
+          message: 'No crash detected',
+          duration: stopwatch.elapsed,
+        );
+      }
+    } catch (e) {
+      stopwatch.stop();
+      return StepResult.failure(
+        'Failed to recover from crash: $e',
+        duration: stopwatch.elapsed,
+      );
+    }
+  }
+
+  /// Wait for app to become responsive
+  Future<StepResult> waitForAppResponsive(
+    WidgetTester tester, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    final stopwatch = Stopwatch()..start();
+
+    print('⏳ Waiting for app to become responsive...');
+
+    try {
+      final endTime = DateTime.now().add(timeout);
+
+      while (DateTime.now().isBefore(endTime)) {
+        // Check for ANR or crash dialogs
+        await _checkForANR(tester);
+        await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+        // Check if app is responsive by looking for normal UI
+        final scaffoldFinder = find.byType(Scaffold);
+        if (tester.any(scaffoldFinder)) {
+          stopwatch.stop();
+          print('✅ App is responsive');
+          return StepResult.success(
+            message: 'App became responsive',
+            duration: stopwatch.elapsed,
+          );
+        }
+
+        await Future.delayed(const Duration(seconds: 1));
+      }
+
+      stopwatch.stop();
+      return StepResult.failure(
+        'App did not become responsive within ${timeout.inSeconds}s',
+        duration: stopwatch.elapsed,
+      );
+    } catch (e) {
+      stopwatch.stop();
+      return StepResult.failure(
+        'Failed to wait for app: $e',
+        duration: stopwatch.elapsed,
+      );
+    }
+  }
+
+  /// Dismiss any visible native dialog
+  Future<void> dismissAnyDialog(WidgetTester tester) async {
+    print('🔄 Attempting to dismiss any visible dialogs...');
+
+    final dismissTexts = [
+      'OK',
+      'Close',
+      'Cancel',
+      'Dismiss',
+      'Later',
+      'Not now',
+      'Skip',
+      'Got it',
+    ];
+
+    for (final text in dismissTexts) {
+      final finder = find.text(text, skipOffstage: false);
+      if (tester.any(finder)) {
+        try {
+          await tester.tap(finder, warnIfMissed: false);
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+          print('✅ Dismissed dialog with: $text');
+          return;
+        } catch (e) {
+          // Try next option
+        }
+      }
+    }
+
+    // Try pressing back button
+    try {
+      await tester.pageBack();
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      print('✅ Dismissed dialog with back button');
+    } catch (e) {
+      print('⚠️  Could not dismiss dialog');
+    }
+  }
+}
+
+/// Extension methods for easier native action handling
+extension NativeActionExtensions on WidgetTester {
+  /// Handle all startup permissions
+  Future<void> handleStartupPermissions() async {
+    await NativeActionHandler.instance.handleAllStartupPermissions(this);
+  }
+
+  /// Handle location permission
+  Future<void> grantLocationPermission() async {
+    await NativeActionHandler.instance.handleLocationPermission(this);
+  }
+
+  /// Handle notification permission
+  Future<void> grantNotificationPermission() async {
+    await NativeActionHandler.instance.handleNotificationPermission(this);
+  }
+
+  /// Handle camera permission
+  Future<void> grantCameraPermission() async {
+    await NativeActionHandler.instance.handleCameraPermission(this);
+  }
+
+  /// Handle storage permission
+  Future<void> grantStoragePermission() async {
+    await NativeActionHandler.instance.handleStoragePermission(this);
+  }
+
+  /// Recover from ANR
+  Future<void> recoverFromANR() async {
+    await NativeActionHandler.instance.recoverFromANR(this);
+  }
+
+  /// Recover from crash
+  Future<void> recoverFromCrash() async {
+    await NativeActionHandler.instance.recoverFromCrash(this);
+  }
+
+  /// Wait for app to be responsive
+  Future<void> waitUntilResponsive({Duration? timeout}) async {
+    await NativeActionHandler.instance.waitForAppResponsive(
+      this,
+      timeout: timeout ?? const Duration(seconds: 30),
+    );
+  }
+
+  /// Dismiss any visible dialog
+  Future<void> dismissDialogs() async {
+    await NativeActionHandler.instance.dismissAnyDialog(this);
+  }
+}
