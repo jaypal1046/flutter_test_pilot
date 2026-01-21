@@ -2,6 +2,7 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   errors:
     depend_on_referenced_packages: ignore
+    deprecated_member_use: ignore
 
 # https://dart.dev/guides/language/analysis-options
 
