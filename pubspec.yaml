@@ -1,6 +1,7 @@
 name: flutter_test_pilot
 description: "A comprehensive Flutter automation testing framework for intuitive UI testing with CLI support."
 version: 2.0.0
+repository: https://github.com/jaypal1046/flutter_test_pilot
 
 environment:
   sdk: ">=3.8.0 <4.0.0"
