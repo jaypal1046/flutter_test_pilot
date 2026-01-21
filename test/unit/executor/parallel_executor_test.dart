@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_test_pilot/executor/parallel_executor.dart';
-import 'package:flutter_test_pilot/core/models/test_result.dart';
+import 'package:flutter_test_pilot/src/executor/parallel_executor.dart';
+import 'package:flutter_test_pilot/src/core/models/test_result.dart';
 
 void main() {
   group('ParallelExecutor', () {

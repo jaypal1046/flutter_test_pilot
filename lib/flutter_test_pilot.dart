@@ -6,6 +6,9 @@ export 'package:flutter_test/flutter_test.dart' hide Timeout;
 // Core test runner
 export 'src/test_pilot_runner.dart';
 
+// CLI
+export 'src/cli/command_runner.dart';
+
 // Test suite components
 export 'src/test_suite/test_suite.dart';
 export 'src/test_suite/test_action.dart';
@@ -15,6 +18,7 @@ export 'src/test_suite/step_result.dart';
 
 // Discovery
 export 'src/discovery/test_discovery.dart';
+export 'src/discovery/test_finder.dart'; // From top-level
 
 // Recording
 export 'src/recording/test_recorder.dart';
@@ -27,6 +31,7 @@ export 'src/reporting/ci_cd_reporter.dart';
 export 'src/reporting/console_reporter.dart';
 export 'src/reporting/json_reporter.dart';
 export 'src/reporting/comprehensive_test_report_generator.dart'; // NEW: Auto report generation
+export 'src/reporting/screenshot_capturer.dart'; // From top-level
 
 // UI Interactions
 export 'src/test_suite/ui_interaction/tap/tap.dart';
@@ -98,11 +103,11 @@ export 'src/test_suite/extensions/enhanced_tester_extensions.dart';
 export 'src/test_suite/pump/safe_pump_manager.dart';
 
 // Native Features (Phase 2 & 3)
-export 'native/adb_commander.dart';
-export 'native/permission_granter.dart';
-export 'native/dialog_watcher.dart';
-export 'native/native_handler.dart';
-export 'native/watcher_config.dart'; // NEW: Export watcher configuration
+export 'src/native/adb_commander.dart';
+export 'src/native/permission_granter.dart';
+export 'src/native/dialog_watcher.dart';
+export 'src/native/native_handler.dart';
+export 'src/native/watcher_config.dart'; // NEW: Export watcher configuration
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

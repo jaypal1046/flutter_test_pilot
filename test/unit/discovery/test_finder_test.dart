@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_test_pilot/discovery/test_finder.dart';
+import 'package:flutter_test_pilot/src/discovery/test_finder.dart';
 import 'dart:io';
 
 void main() {

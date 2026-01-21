@@ -1,14 +1,14 @@
 import 'dart:io';
-import 'package:flutter_test_pilot/native/adb_commander.dart';
-import 'package:flutter_test_pilot/native/permission_granter.dart';
-import 'package:flutter_test_pilot/native/dialog_watcher.dart';
-import 'package:flutter_test_pilot/native/native_handler.dart';
-import 'package:flutter_test_pilot/executor/retry_handler.dart';
-import 'package:flutter_test_pilot/executor/parallel_executor.dart';
-import 'package:flutter_test_pilot/discovery/test_finder.dart';
-import 'package:flutter_test_pilot/reporting/screenshot_capturer.dart';
-import 'package:flutter_test_pilot/core/models/test_result.dart';
-import 'package:flutter_test_pilot/core/cache/cache_manager.dart';
+import 'package:flutter_test_pilot/src/native/adb_commander.dart';
+import 'package:flutter_test_pilot/src/native/permission_granter.dart';
+import 'package:flutter_test_pilot/src/native/dialog_watcher.dart';
+import 'package:flutter_test_pilot/src/native/native_handler.dart';
+import 'package:flutter_test_pilot/src/executor/retry_handler.dart';
+import 'package:flutter_test_pilot/src/executor/parallel_executor.dart';
+import 'package:flutter_test_pilot/src/discovery/test_finder.dart';
+import 'package:flutter_test_pilot/src/reporting/screenshot_capturer.dart';
+import 'package:flutter_test_pilot/src/core/models/test_result.dart';
+import 'package:flutter_test_pilot/src/core/cache/cache_manager.dart';
 
 /// Comprehensive test suite for Flutter Test Pilot Phase 2 & 3
 void main() async {

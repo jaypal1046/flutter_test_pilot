@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_test_pilot/core/cache/cache_manager.dart';
-import 'package:flutter_test_pilot/core/models/test_result.dart';
+import 'package:flutter_test_pilot/src/core/cache/cache_manager.dart';
+import 'package:flutter_test_pilot/src/core/models/test_result.dart';
 
 void main() {
   group('CacheManager', () {

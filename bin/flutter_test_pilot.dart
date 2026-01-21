@@ -1,7 +1,7 @@
 #!/usr/bin/env dart
 
 import 'dart:io';
-import 'package:flutter_test_pilot/cli/command_runner.dart';
+import 'package:flutter_test_pilot/flutter_test_pilot.dart';
 
 Future<void> main(List<String> arguments) async {
   try {
