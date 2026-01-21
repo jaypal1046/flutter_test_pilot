@@ -79,13 +79,12 @@ class ElementVerifier {
     } catch (e) {
       stopwatch.stop();
       return StepResult.failure(
-        'Failed to verify $name: $e',
+        'Element verification failed: $e',
         duration: stopwatch.elapsed,
       );
     }
   }
 
-  /// Wait for element to appear
   Future<bool> _waitForElement(
     WidgetTester tester,
     Finder finder,
@@ -94,121 +93,87 @@ class ElementVerifier {
     final endTime = DateTime.now().add(timeout);
 
     while (DateTime.now().isBefore(endTime)) {
-      await tester.pumpAndSettle(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 100));
 
       if (tester.any(finder)) {
         return true;
       }
-
-      await Future.delayed(const Duration(milliseconds: 100));
     }
 
     return false;
   }
 
-  /// Check if element is visible on screen
   bool _isElementVisible(WidgetTester tester, Finder finder) {
     if (!tester.any(finder)) return false;
 
     try {
-      final element = finder.evaluate().first;
+      final element = tester.element(finder);
       final renderObject = element.renderObject;
 
-      if (renderObject == null) return false;
-
-      // Check if within viewport
-      final renderBox = renderObject as RenderBox;
-      final position = renderBox.localToGlobal(Offset.zero);
-      final size = renderBox.size;
-
-      final screenSize =
-          tester.binding.window.physicalSize /
-          tester.binding.window.devicePixelRatio;
-
-      return position.dx >= 0 &&
-          position.dy >= 0 &&
-          position.dx + size.width <= screenSize.width &&
-          position.dy + size.height <= screenSize.height;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /// Check if element is enabled
-  bool _isElementEnabled(WidgetTester tester, Finder finder) {
-    if (!tester.any(finder)) return false;
-
-    try {
-      final widget = tester.widget(finder);
-
-      // Check various widget types
-      if (widget is ElevatedButton ||
-          widget is TextButton ||
-          widget is OutlinedButton) {
-        final button = widget as dynamic;
-        return button.onPressed != null;
+      if (renderObject == null || !renderObject.attached) {
+        return false;
       }
 
-      if (widget is IconButton) {
-        return widget.onPressed != null;
+      if (renderObject is RenderBox) {
+        return renderObject.size.width > 0 && renderObject.size.height > 0;
       }
 
-      if (widget is TextField || widget is TextFormField) {
-        final textField = widget as dynamic;
-        return textField.enabled ?? true;
-      }
-
-      if (widget is Checkbox) {
-        return widget.onChanged != null;
-      }
-
-      if (widget is Radio) {
-        return widget.onChanged != null;
-      }
-
-      if (widget is Switch) {
-        return widget.onChanged != null;
-      }
-
-      if (widget is Slider) {
-        return widget.onChanged != null;
-      }
-
-      // Default: assume enabled if no specific check
       return true;
     } catch (e) {
       return false;
     }
   }
 
-  /// Check if element can receive pointer events
+  bool _isElementEnabled(WidgetTester tester, Finder finder) {
+    if (!tester.any(finder)) return false;
+
+    try {
+      final widget = tester.widget(finder);
+
+      // Check common widget types for enabled state
+      if (widget is ElevatedButton ||
+          widget is TextButton ||
+          widget is OutlinedButton) {
+        return (widget as dynamic).onPressed != null;
+      }
+
+      if (widget is TextField) {
+        return widget.enabled ?? true;
+      }
+
+      // Default to true if we can't determine
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   bool _isElementHitTestable(WidgetTester tester, Finder finder) {
     if (!tester.any(finder)) return false;
 
     try {
-      final element = finder.evaluate().first;
+      final element = tester.element(finder);
       final renderObject = element.renderObject;
 
-      if (renderObject == null) return false;
+      if (renderObject == null || !renderObject.attached) {
+        return false;
+      }
 
-      final renderBox = renderObject as RenderBox;
-      final center = renderBox.localToGlobal(
-        renderBox.size.center(Offset.zero),
-      );
+      if (renderObject is RenderBox) {
+        final position = renderObject.localToGlobal(Offset.zero);
+        final size = renderObject.size;
 
-      // Perform hit test at center of element
-      final result = HitTestResult();
-      tester.binding.hitTest(result, center);
+        // Simple hit test at center of widget
+        final center = position + Offset(size.width / 2, size.height / 2);
+        final result = HitTestResult();
 
-      // Check if our element is in the hit test result
-      bool found = false;
-      result.path.forEach((entry) {
-        if (entry.target == renderObject) {
-          found = true;
-        }
-      });
+        RendererBinding.instance.hitTest(result, center);
 
-      return found;
+        // Check if our widget is in the hit test result
+        return result.path.any((entry) => entry.target == renderObject);
+      }
+
+      return true;
     } catch (e) {
       return false;
     }

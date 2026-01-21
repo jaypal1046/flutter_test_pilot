@@ -34,16 +34,16 @@ class StepResult {
       duration: duration ?? Duration.zero,
     );
   }
-  factory StepResult.warning({
-    required String message,
-    Duration? duration,
-    Map<String, dynamic>? data,
-  }) {
-    return StepResult(
-      success: true,
-      message: message,
-      duration: duration ?? Duration.zero,
-      data: data,
-    );
-  }
+factory StepResult.warning({
+  required String message,
+  Duration? duration,
+  Map<String, dynamic>? data,
+}) {
+  return StepResult(
+    success: true,
+    message: message,
+    duration: duration ?? Duration.zero,
+    data: data,
+  );
+}
 }

@@ -70,14 +70,17 @@ class WaitAction extends TestAction {
   final Duration duration;
   final String? customDescription;
 
-  const WaitAction({required this.duration, this.customDescription});
+  const WaitAction({
+    required this.duration,
+    this.customDescription,
+  });
 
   @override
   Future<StepResult> execute(WidgetTester tester) async {
     final stopwatch = Stopwatch()..start();
 
     await Future.delayed(duration);
-
+    
     // CRITICAL FIX: Use bounded pump instead of pumpAndSettle
     // pumpAndSettle will hang if there are continuous animations
     try {
@@ -99,6 +102,5 @@ class WaitAction extends TestAction {
   }
 
   @override
-  String get description =>
-      customDescription ?? 'Wait ${duration.inMilliseconds}ms';
+  String get description => customDescription ?? 'Wait ${duration.inMilliseconds}ms';
 }

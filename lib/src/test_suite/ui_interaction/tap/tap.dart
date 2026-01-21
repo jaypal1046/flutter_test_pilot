@@ -11,6 +11,7 @@ abstract class TapAction extends TestAction {
   final String? widgetText;
   final String? widgetKey;
   final Type? widgetType;
+  final Finder? customFinder;  // NEW: Support for custom Finder
   final TapContext? context;
   final GestureType gestureType;
 
@@ -18,6 +19,7 @@ abstract class TapAction extends TestAction {
     this.widgetText,
     this.widgetKey,
     this.widgetType,
+    this.customFinder,  // NEW
     this.context,
     required this.gestureType,
   });
@@ -48,14 +50,79 @@ abstract class TapAction extends TestAction {
     );
   }
 
-  /// Tap widget by identifier (text or type)
+  /// Tap widget by text OR by custom Finder
+  /// 
+  /// Examples:
+  /// ```dart
+  /// // Tap by text
+  /// TapAction.widget('Submit')
+  /// 
+  /// // Tap by Finder (BackButton)
+  /// TapAction.widget(find.byType(BackButton))
+  /// 
+  /// // Tap by icon
+  /// TapAction.widget(find.byIcon(Icons.arrow_back))
+  /// 
+  /// // Tap by widget predicate
+  /// TapAction.widget(find.byWidgetPredicate((w) => w is IconButton))
+  /// ```
   factory TapAction.widget(
-    String text, {
+    dynamic textOrFinder, {
+    TapContext? context,
+    GestureType gestureType = GestureType.singleTap,
+  }) {
+    if (textOrFinder is String) {
+      return _TapActionImpl(
+        widgetText: textOrFinder,
+        context: context,
+        gestureType: gestureType,
+      );
+    } else if (textOrFinder is Finder) {
+      return _TapActionImpl(
+        customFinder: textOrFinder,
+        context: context,
+        gestureType: gestureType,
+      );
+    } else {
+      throw ArgumentError(
+        'TapAction.widget() expects either String or Finder, got ${textOrFinder.runtimeType}',
+      );
+    }
+  }
+
+  /// Tap widget by Type
+  /// 
+  /// Example:
+  /// ```dart
+  /// TapAction.byType(BackButton)
+  /// TapAction.byType(IconButton)
+  /// ```
+  factory TapAction.byType(
+    Type widgetType, {
     TapContext? context,
     GestureType gestureType = GestureType.singleTap,
   }) {
     return _TapActionImpl(
-      widgetText: text,
+      widgetType: widgetType,
+      context: context,
+      gestureType: gestureType,
+    );
+  }
+
+  /// Tap widget by icon
+  /// 
+  /// Example:
+  /// ```dart
+  /// TapAction.icon(Icons.arrow_back)
+  /// TapAction.icon(Icons.close)
+  /// ```
+  factory TapAction.icon(
+    IconData icon, {
+    TapContext? context,
+    GestureType gestureType = GestureType.singleTap,
+  }) {
+    return _TapActionImpl(
+      customFinder: find.byIcon(icon),
       context: context,
       gestureType: gestureType,
     );
@@ -67,6 +134,7 @@ abstract class TapAction extends TestAction {
       widgetText: widgetText,
       widgetKey: widgetKey,
       widgetType: widgetType,
+      customFinder: customFinder,
       context: TapContext._(contextDescription: contextDescription),
       gestureType: gestureType,
     );
@@ -78,6 +146,7 @@ abstract class TapAction extends TestAction {
       widgetText: widgetText,
       widgetKey: widgetKey,
       widgetType: widgetType,
+      customFinder: customFinder,
       context: TapContext._(position: position),
       gestureType: gestureType,
     );
@@ -120,7 +189,7 @@ abstract class TapAction extends TestAction {
 
       return StepResult.success(
         message:
-            '${gestureType.name} on ${widgetText ?? widgetKey ?? widgetType}',
+            '${gestureType.name} on ${widgetText ?? widgetKey ?? widgetType ?? 'custom widget'}',
         duration: stopwatch.elapsed,
       );
     } catch (e) {
@@ -135,7 +204,10 @@ abstract class TapAction extends TestAction {
   Finder _findWidget(WidgetTester tester) {
     Finder finder;
 
-    if (widgetKey != null) {
+    // NEW: Prioritize custom finder if provided
+    if (customFinder != null) {
+      finder = customFinder!;
+    } else if (widgetKey != null) {
       finder = find.byKey(Key(widgetKey!));
     } else if (widgetText != null) {
       finder = find.text(widgetText!);
@@ -146,14 +218,19 @@ abstract class TapAction extends TestAction {
       finder = find.byType(widgetType!);
     } else {
       throw Exception(
-        'Must specify either text, key, or type for ${gestureType.name} action',
+        'Must specify either text, key, type, or finder for ${gestureType.name} action',
       );
     }
 
     if (tester.widgetList(finder).isEmpty) {
       throw Exception(
-        'No widget found for ${gestureType.name} with ${widgetText ?? widgetKey ?? widgetType}',
+        'No widget found for ${gestureType.name} with ${widgetText ?? widgetKey ?? widgetType ?? 'custom finder'}',
       );
+    }
+
+    // Handle disambiguation for custom finders
+    if (customFinder != null && tester.widgetList(finder).length > 1) {
+      finder = _disambiguateFinder(finder, tester);
     }
 
     return finder;
@@ -204,7 +281,7 @@ Example: TapAction.widget("Submit").inContext("Policy Info")
 
   @override
   String get description =>
-      '${gestureType.name} ${widgetText ?? widgetKey ?? widgetType}';
+      '${gestureType.name} ${widgetText ?? widgetKey ?? widgetType ?? 'widget'}';
 }
 
 class _TapActionImpl extends TapAction {
@@ -212,6 +289,7 @@ class _TapActionImpl extends TapAction {
     super.widgetText,
     super.widgetKey,
     super.widgetType,
+    super.customFinder,  // NEW
     super.context,
     required super.gestureType,
   }) : super._();

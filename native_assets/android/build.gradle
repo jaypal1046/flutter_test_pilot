@@ -1,0 +1,73 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'com.testpilot.watcher'
+    compileSdk 34
+    
+    defaultConfig {
+        minSdk 21
+        targetSdk 34
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'androidx.test.uiautomator:uiautomator:2.3.0'
+    implementation 'androidx.test:runner:1.5.2'
+    implementation 'junit:junit:4.13.2'
+}
+
+// Task to build the instrumentation APK (not JAR)
+task buildWatcherApk {
+    dependsOn 'assembleDebugAndroidTest'
+    
+    doLast {
+        // Copy the instrumentation APK to a known location
+        def sourceApk = file("$buildDir/outputs/apk/androidTest/debug/native_watcher-debug-androidTest.apk")
+        def destApk = file("$buildDir/libs/native_watcher.apk")
+        
+        destApk.parentFile.mkdirs()
+        
+        if (sourceApk.exists()) {
+            copy {
+                from sourceApk
+                into destApk.parentFile
+                rename { destApk.name }
+            }
+            println "✅ Watcher APK built: ${destApk}"
+        } else {
+            throw new GradleException("Instrumentation APK not found at: ${sourceApk}")
+        }
+    }
+}
+
+// Keep the old JAR task name for backward compatibility, but make it build APK instead
+task buildWatcherJar {
+    dependsOn 'buildWatcherApk'
+}

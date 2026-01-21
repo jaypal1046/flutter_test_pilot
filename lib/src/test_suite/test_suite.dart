@@ -1,8 +1,17 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test_pilot/flutter_test_pilot.dart';
 import 'test_action.dart';
 import 'test_result.dart';
 import 'test_status.dart';
 import 'step_result.dart';
+import '../reporting/test_result_logger.dart'
+    hide ApiTestResult; // NEW: Import logger
+import '../reporting/comprehensive_test_report_generator.dart'; // NEW: Comprehensive reports
+import 'apis/apis_observer.dart'; // Import for ApiTestAction
+import 'apis/apis_observer_manager.dart'; // Import for ApiObserverManager
 
 /// Configuration for test suite execution
 class TestSuiteConfig {
@@ -12,6 +21,9 @@ class TestSuiteConfig {
   final bool continueOnFailure;
   final bool verifyBeforeAction;
   final bool takeScreenshotOnFailure;
+  final bool autoLogResults; // Disabled by default for mobile tests
+  final bool autoGenerateReports; // NEW: Control report generation separately
+  final TestResultLogger? logger;
 
   const TestSuiteConfig({
     this.maxRetries = 3,
@@ -20,6 +32,9 @@ class TestSuiteConfig {
     this.continueOnFailure = false,
     this.verifyBeforeAction = true,
     this.takeScreenshotOnFailure = false,
+    this.autoLogResults = false, // CHANGED: Disabled by default (was true)
+    this.autoGenerateReports = false, // NEW: Disabled by default
+    this.logger,
   });
 }
 
@@ -57,6 +72,31 @@ class TestSuite {
     print('\n🧪 Starting Test Suite: $name');
     print('═' * 60);
 
+    // ═══════════════════════════════════════════════════════════
+    // CRITICAL: Register API tests BEFORE executing any UI steps
+    // API validation will happen in PARALLEL with UI execution
+    // ═══════════════════════════════════════════════════════════
+    if (apis.isNotEmpty) {
+      print('🌐 Registering ${apis.length} API tests...');
+      print('   These will monitor API calls in PARALLEL with UI execution');
+      print('   ⚡ Real-time validation: APIs validated as they are called');
+      print('');
+
+      for (final apiTest in apis) {
+        if (apiTest is ApiTestAction) {
+          ApiObserverManager.instance.registerApiTest(apiTest);
+          print(
+            '   📋 ${apiTest.apiId} → Monitoring ${apiTest.method ?? "ANY"} ${apiTest.urlPattern ?? "ANY"}',
+          );
+        }
+      }
+
+      print('');
+      print('✅ API Observer is now monitoring in BACKGROUND');
+      print('   UI tests will run independently - no blocking!');
+      print('');
+    }
+
     try {
       // Execute setup phase
       if (setup.isNotEmpty) {
@@ -65,19 +105,38 @@ class TestSuite {
       }
 
       // Execute main test steps
+      // APIs are monitored in PARALLEL - no waiting!
       if (steps.isNotEmpty) {
         print('🎯 Test Phase (${steps.length} steps)...');
-        await _executePhase(steps, tester, result, TestPhase.test, 'Test');
+        print('   💡 API validation happens in PARALLEL - no blocking');
+
+        // Start listening to API test results in parallel
+        final apiResultSubscription = apis.isNotEmpty
+            ? _startApiResultMonitoring()
+            : null;
+
+        try {
+          // Execute UI steps without waiting for APIs
+          await _executePhase(steps, tester, result, TestPhase.test, 'Test');
+        } finally {
+          // Stop monitoring when UI tests complete
+          await apiResultSubscription?.cancel();
+        }
       }
 
-      // Execute API tests
+      // Brief wait for any final API calls to complete
       if (apis.isNotEmpty) {
-        print('🌐 API Phase (${apis.length} steps)...');
-        await _executePhase(apis, tester, result, TestPhase.apis, 'API');
+        print('');
+        print('⏳ Waiting 2s for final API calls to complete...');
+        await Future.delayed(const Duration(seconds: 2));
+
+        // Report API results
+        _printApiMonitoringSummary();
       }
 
       // Execute assertions
       if (assertions.isNotEmpty) {
+        print('');
         print('✓ Assertion Phase (${assertions.length} steps)...');
         await _executePhase(
           assertions,
@@ -91,14 +150,22 @@ class TestSuite {
       result.status = TestStatus.passed;
       result.endTime = DateTime.now();
 
+      print('');
       print('✅ Test Suite PASSED: $name');
       print('   Duration: ${result.totalDuration.inMilliseconds}ms');
-      print('   Steps: ${result.passedSteps}/${result.totalSteps}');
+      print('   UI Steps: ${result.passedSteps}/${result.totalSteps}');
+
+      if (apis.isNotEmpty) {
+        final apiResults = ApiObserverManager.instance.allTestResults;
+        final passedApis = apiResults.where((t) => t.isSuccess).length;
+        print('   API Tests: $passedApis/${apiResults.length} validated');
+      }
     } catch (e) {
       result.status = TestStatus.failed;
       result.error = e.toString();
       result.endTime = DateTime.now();
 
+      print('');
       print('❌ Test Suite FAILED: $name');
       print('   Error: $e');
       print('   Duration: ${result.totalDuration.inMilliseconds}ms');
@@ -110,6 +177,7 @@ class TestSuite {
     } finally {
       // Always run cleanup
       if (cleanup.isNotEmpty) {
+        print('');
         print('🧹 Cleanup Phase (${cleanup.length} steps)...');
         try {
           await _executePhase(
@@ -126,6 +194,14 @@ class TestSuite {
         }
       }
 
+      // NEW: Auto-log test results
+      if (config.autoLogResults) {
+        await _logTestResult(result);
+      }
+
+      // NEW: Generate comprehensive reports automatically
+      await _generateComprehensiveReports(result);
+
       print('═' * 60);
       if (result.hasWarnings) {
         print('⚠️  ${result.warnings.length} warning(s) encountered');
@@ -133,6 +209,121 @@ class TestSuite {
     }
 
     return result;
+  }
+
+  /// Start monitoring API test results in parallel with UI execution
+  StreamSubscription<ApiTestResult>? _startApiResultMonitoring() {
+    print('🔊 Starting parallel API result monitoring...');
+
+    return ApiObserverManager.instance.testResults.listen(
+      (apiResult) {
+        // Log API test results in real-time as they come in
+        // This runs in PARALLEL with UI tests - no blocking!
+        final icon = apiResult.isSuccess ? '✅' : '❌';
+        print('');
+        print('   $icon API Test Result (Real-time): ${apiResult.apiId}');
+        print('      Status: ${apiResult.apiCall.statusCode}');
+        print(
+          '      Validations: ${apiResult.passedValidations}/${apiResult.totalValidations}',
+        );
+
+        if (!apiResult.isSuccess && apiResult.failures.isNotEmpty) {
+          print('      Failures:');
+          for (final failure in apiResult.failures.take(3)) {
+            print('         • ${failure.fieldPath}: ${failure.message}');
+          }
+        }
+        print('');
+      },
+      onError: (error) {
+        print('⚠️  API monitoring error: $error');
+      },
+    );
+  }
+
+  /// Print comprehensive API monitoring summary
+  void _printApiMonitoringSummary() {
+    final capturedCalls = ApiObserverManager.instance.capturedCalls;
+    final testResults = ApiObserverManager.instance.allTestResults;
+
+    print('');
+    print('═' * 60);
+    print('📊 API MONITORING SUMMARY (Parallel Execution)');
+    print('═' * 60);
+    print('Total API calls captured: ${capturedCalls.length}');
+    print('Total API tests executed: ${testResults.length}');
+    print('API tests passed: ${testResults.where((t) => t.isSuccess).length}');
+    print('API tests failed: ${testResults.where((t) => !t.isSuccess).length}');
+    print('');
+
+    if (capturedCalls.isEmpty) {
+      print('⚠️  WARNING: No API calls were captured!');
+      print('');
+      print('Troubleshooting:');
+      print('  1. Check if API Observer interceptor is attached to Dio');
+      print('  2. Verify APIs are being called through monitored Dio instance');
+      print('  3. Ensure app is not using different HTTP client');
+      print('  4. Run ApiObserverManager.runDiagnostics() for details');
+      print('');
+    } else {
+      print('📋 Captured API Calls (Parallel Monitoring):');
+      for (final call in capturedCalls) {
+        final statusIcon =
+            (call.statusCode ?? 0) >= 200 && (call.statusCode ?? 0) < 300
+            ? '✅'
+            : '❌';
+        print('   $statusIcon ${call.method} ${call.url}');
+        print(
+          '      Status: ${call.statusCode ?? "N/A"} | Duration: ${call.duration.inMilliseconds}ms',
+        );
+
+        // Show which test matched this call
+        final matchingResult = testResults
+            .where(
+              (r) =>
+                  r.apiCall.url == call.url && r.apiCall.method == call.method,
+            )
+            .firstOrNull;
+
+        if (matchingResult != null) {
+          print(
+            '      Matched Test: ${matchingResult.apiId} (${matchingResult.isSuccess ? "PASSED" : "FAILED"})',
+          );
+        }
+      }
+      print('');
+
+      // Show detailed test results
+      if (testResults.isNotEmpty) {
+        print('📝 Detailed API Test Results:');
+        for (final testResult in testResults) {
+          final icon = testResult.isSuccess ? '✅' : '❌';
+          print('   $icon ${testResult.apiId}');
+          print(
+            '      URL: ${testResult.apiCall.method} ${testResult.apiCall.url}',
+          );
+          print('      Status: ${testResult.apiCall.statusCode}');
+          print(
+            '      Validations: ${testResult.passedValidations}/${testResult.totalValidations}',
+          );
+          print(
+            '      Duration: ${testResult.apiCall.duration.inMilliseconds}ms',
+          );
+
+          if (!testResult.isSuccess && testResult.failures.isNotEmpty) {
+            print('      ❌ Failures:');
+            for (final failure in testResult.failures) {
+              print('         • ${failure.fieldPath}');
+              print('           Expected: ${failure.expectedValue}');
+              print('           Actual: ${failure.actualValue}');
+              print('           Message: ${failure.message}');
+            }
+          }
+          print('');
+        }
+      }
+    }
+    print('═' * 60);
   }
 
   /// Execute a phase of test actions with retry and error handling
@@ -293,6 +484,69 @@ class TestSuite {
     } catch (e) {
       result.addWarning('Failed to capture screenshot: $e');
     }
+  }
+
+  // NEW: Log test result to file system
+  Future<void> _logTestResult(TestResult result) async {
+    try {
+      final logger = config.logger ?? TestResultLogger();
+
+      final testId = await logger.logTestResult(
+        result,
+        executor: _getExecutor(),
+        buildNumber: _getBuildNumber(),
+        commitHash: _getCommitHash(),
+        screenshot: result.metadata['screenshot'] as String?,
+      );
+
+      result.metadata['logged_test_id'] = testId;
+    } catch (e) {
+      print('⚠️  Failed to log test result: $e');
+      // Don't fail the test because of logging issues
+    }
+  }
+
+  // NEW: Generate comprehensive reports automatically
+  Future<void> _generateComprehensiveReports(TestResult result) async {
+    try {
+      // Check if reports are enabled
+      if (!ComprehensiveTestReportGenerator.instance.reportsEnabled) {
+        print('');
+        print('💡 Test reports disabled. To enable:');
+        print('   unset DISABLE_TEST_REPORTS');
+        return;
+      }
+
+      // Collect API data
+      final capturedApiCalls = ApiObserverManager.instance.capturedCalls;
+      final apiTestResults = ApiObserverManager.instance.allTestResults;
+
+      // Generate all reports automatically
+      await ComprehensiveTestReportGenerator.instance.generateReports(
+        testResult: result,
+        capturedApiCalls: capturedApiCalls,
+        apiTestResults: apiTestResults,
+      );
+    } catch (e) {
+      print('');
+      print('⚠️  Report generation failed (non-fatal): $e');
+      print('💡 Test execution was successful - reports are optional');
+    }
+  }
+
+  String _getExecutor() {
+    return Platform.environment['USER'] ??
+        Platform.environment['USERNAME'] ??
+        'unknown';
+  }
+
+  String? _getBuildNumber() {
+    return Platform.environment['BUILD_NUMBER'];
+  }
+
+  String? _getCommitHash() {
+    return Platform.environment['GIT_COMMIT'] ??
+        Platform.environment['COMMIT_SHA'];
   }
 
   /// Create a copy of this suite with different configuration

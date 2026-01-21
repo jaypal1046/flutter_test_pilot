@@ -21,6 +21,7 @@ class NativeActionHandler {
   final Set<String> _handledDialogs = {};
   int _checkCounter = 0;
   bool _isPaused = false; // NEW: Flag to pause monitoring temporarily
+  bool _isPumping = false; // NEW: Track if we're currently pumping
 
   /// Get the count of handled dialogs (public accessor)
   int get handledDialogCount => _handledDialogs.length;
@@ -63,13 +64,28 @@ class NativeActionHandler {
 
   /// COMPREHENSIVE: Check for all types of native UI elements
   Future<void> _checkForNativeElements(WidgetTester tester) async {
-    if (_isPaused) return; // Skip checks if paused
+    if (_isPaused) return; // Skip checks if manually paused
+    if (_isPumping)
+      return; // NEW: Skip if already pumping (automatic conflict detection)
+
+    // Set flag to prevent re-entry
+    _isPumping = true;
 
     try {
       _checkCounter++;
 
-      // Pump once to capture any new UI changes
-      await tester.pump(Duration.zero);
+      // Pump once to capture any new UI changes with try-catch for conflicts
+      try {
+        await tester.pump(Duration.zero);
+      } catch (e) {
+        // If pump fails due to conflict, skip this check cycle
+        if (e.toString().contains('Guarded function conflict')) {
+          // Silently skip - another test action is using pump
+          return;
+        }
+        // Re-throw other errors
+        rethrow;
+      }
 
       // Priority handling order:
       // 🔥 HIGHEST PRIORITY: Phone picker bottom sheet (blocks UI completely)
@@ -106,8 +122,21 @@ class NativeActionHandler {
     } catch (e) {
       // Silent catch - don't interrupt the test
       if (_checkCounter % 50 == 0) {
-        print('⚠️  Native Handler: Error during check: $e');
+        // Check if it's a guarded function conflict
+        if (e.toString().contains('Guarded function conflict')) {
+          // This is expected - test action is running
+          if (_checkCounter % 100 == 0) {
+            print(
+              '⚠️  Native Handler: Skipping checks while test actions are running',
+            );
+          }
+        } else {
+          print('⚠️  Native Handler: Error during check: $e');
+        }
       }
+    } finally {
+      // Always reset the flag
+      _isPumping = false;
     }
   }
 

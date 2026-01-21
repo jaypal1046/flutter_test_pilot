@@ -1,0 +1,1283 @@
+﻿# 🚀 Flutter Test Pilot CLI - IMPROVED Implementation Plan v2.0
+
+**Project:** Flutter Test Pilot Custom CLI Test Runner  
+**Version:** 2.0 (Enhanced)  
+**Timeline:** 8-10 weeks (production-ready)  
+**Goal:** Enterprise-grade test automation with native action handling  
+**Status:** Planning Phase  
+**Last Updated:** January 19, 2026
+
+---
+
+## 🎯 **What's New in v2.0 (Improvements)**
+
+### **Architecture Improvements:**
+✅ **Plugin System** - Extensible architecture for custom plugins  
+✅ **Caching Layer** - Smart caching for faster test execution  
+✅ **Distributed Testing** - Run tests across multiple machines  
+✅ **Test Sharding** - Intelligent test distribution  
+✅ **Remote Device Farm** - Support for BrowserStack, AWS Device Farm  
+✅ **AI-Powered Test Healing** - Auto-fix flaky tests  
+✅ **Real-time Dashboard** - WebSocket-based live test monitoring  
+✅ **Test Replay** - Record and replay test sessions  
+
+### **Developer Experience:**
+✅ **Interactive Mode** - Step-by-step test debugging  
+✅ **Hot Reload Support** - Modify tests without restarting  
+✅ **Smart Test Selection** - Only run affected tests  
+✅ **Autocomplete** - Shell completion for all commands  
+✅ **Configuration Wizard** - Guided setup experience  
+
+### **Enterprise Features:**
+✅ **Multi-tenant Support** - Separate environments per team  
+✅ **RBAC** - Role-based access control  
+✅ **Audit Logs** - Complete test execution history  
+✅ **Cost Tracking** - Monitor device usage costs  
+✅ **SLA Monitoring** - Track test execution SLAs  
+
+---
+
+## 🏗️ **Enhanced Architecture**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  flutter_test_pilot run integration_test/login_test.dart       │
+│  (CLI Layer - User Interface)                                  │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────┴────────────────────────────────────────────┐
+│  ORCHESTRATION LAYER                                            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
+│  │ Test Scheduler│  │ Resource Mgr │  │ Plugin System│         │
+│  └──────────────┘  └──────────────┘  └──────────────┘         │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────┴────────────────────────────────────────────┐
+│  EXECUTION LAYER                                                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
+│  │ Local Device│  │ Cloud Device│  │ Emulator    │            │
+│  │ Pool        │  │ Farm        │  │ Manager     │            │
+│  └─────────────┘  └─────────────┘  └─────────────┘            │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────┴────────────────────────────────────────────┐
+│  SERVICES LAYER                                                 │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ │
+│  │ Native     │ │ Test       │ │ Analytics  │ │ Reporting  │ │
+│  │ Handler    │ │ Recorder   │ │ Engine     │ │ Generator  │ │
+│  └────────────┘ └────────────┘ └────────────┘ └────────────┘ │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────┴────────────────────────────────────────────┐
+│  DATA LAYER                                                     │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ │
+│  │ SQLite     │ │ Redis      │ │ S3/Cloud   │ │ Metrics DB │ │
+│  │ (Local)    │ │ (Cache)    │ │ (Artifacts)│ │ (TimeSeries)│ │
+│  └────────────┘ └────────────┘ └────────────┘ └────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📦 **Enhanced Package Structure**
+
+```
+flutter_test_pilot/
+├── bin/
+│   ├── flutter_test_pilot.dart          # Main CLI entry
+│   └── activate.dart                    # Post-install setup
+│
+├── lib/
+│   ├── cli/
+│   │   ├── command_runner.dart          
+│   │   ├── commands/
+│   │   │   ├── run_command.dart         
+│   │   │   ├── doctor_command.dart      
+│   │   │   ├── config_command.dart      
+│   │   │   ├── init_command.dart        
+│   │   │   ├── devices_command.dart     
+│   │   │   ├── dashboard_command.dart   # NEW: Real-time dashboard
+│   │   │   ├── replay_command.dart      # NEW: Replay tests
+│   │   │   ├── debug_command.dart       # NEW: Interactive debugging
+│   │   │   ├── shard_command.dart       # NEW: Test sharding
+│   │   │   └── cloud_command.dart       # NEW: Cloud device farm
+│   │   └── args/
+│   │       └── run_args.dart            
+│   │
+│   ├── core/
+│   │   ├── config/
+│   │   │   ├── test_pilot_config.dart   
+│   │   │   ├── config_loader.dart       
+│   │   │   └── config_validator.dart    # NEW: Validate configs
+│   │   ├── logger/
+│   │   │   ├── console_logger.dart      
+│   │   │   ├── file_logger.dart         
+│   │   │   └── remote_logger.dart       # NEW: Send logs to server
+│   │   ├── cache/
+│   │   │   ├── test_cache.dart          # NEW: Cache test results
+│   │   │   ├── artifact_cache.dart      # NEW: Cache APK/screenshots
+│   │   │   └── dependency_cache.dart    # NEW: Cache dependencies
+│   │   ├── plugin/
+│   │   │   ├── plugin_manager.dart      # NEW: Plugin system
+│   │   │   ├── plugin_interface.dart    # NEW: Plugin contract
+│   │   │   └── built_in_plugins/        # NEW: Built-in plugins
+│   │   └── models/
+│   │       ├── test_result.dart         
+│   │       ├── device_info.dart         
+│   │       ├── native_event.dart        
+│   │       ├── test_shard.dart          # NEW: Sharding model
+│   │       └── execution_context.dart   # NEW: Execution metadata
+│   │
+│   ├── device/
+│   │   ├── device_manager.dart          
+│   │   ├── android_device.dart          
+│   │   ├── ios_device.dart              
+│   │   ├── device_setup.dart            
+│   │   ├── device_pool.dart             # NEW: Device pooling
+│   │   ├── cloud/
+│   │   │   ├── browserstack_provider.dart   # NEW: BrowserStack
+│   │   │   ├── aws_device_farm.dart         # NEW: AWS Device Farm
+│   │   │   ├── firebase_test_lab.dart       # NEW: Firebase Test Lab
+│   │   │   └── cloud_provider_interface.dart# NEW: Provider contract
+│   │   └── emulator/
+│   │       ├── emulator_manager.dart    # NEW: Auto-create emulators
+│   │       └── emulator_template.dart   # NEW: Emulator presets
+│   │
+│   ├── native/
+│   │   ├── native_handler.dart          
+│   │   ├── permission_granter.dart      
+│   │   ├── dialog_watcher.dart          
+│   │   ├── adb_commander.dart           
+│   │   ├── ios_xcrun_commander.dart     # NEW: iOS native control
+│   │   └── ui_automator/
+│   │       ├── watcher_builder.dart     
+│   │       ├── watcher_compiler.dart    
+│   │       ├── watcher_deployer.dart    
+│   │       └── watcher_registry.dart    # NEW: Custom watchers
+│   │
+│   ├── executor/
+│   │   ├── test_executor.dart           
+│   │   ├── flutter_driver_runner.dart   
+│   │   ├── parallel_executor.dart       
+│   │   ├── retry_handler.dart           
+│   │   ├── process_manager.dart         
+│   │   ├── test_scheduler.dart          # NEW: Smart scheduling
+│   │   ├── test_sharding.dart           # NEW: Shard distribution
+│   │   ├── distributed_executor.dart    # NEW: Multi-machine execution
+│   │   └── smart_test_selection.dart    # NEW: Only run affected tests
+│   │
+│   ├── discovery/
+│   │   ├── test_finder.dart             
+│   │   ├── test_parser.dart             
+│   │   ├── tag_manager.dart             
+│   │   ├── dependency_analyzer.dart     # NEW: Analyze test dependencies
+│   │   └── affected_tests_finder.dart   # NEW: Find changed tests
+│   │
+│   ├── reporting/
+│   │   ├── report_generator.dart        
+│   │   ├── reporters/
+│   │   │   ├── html_reporter.dart       
+│   │   │   ├── json_reporter.dart       
+│   │   │   ├── junit_reporter.dart      
+│   │   │   ├── markdown_reporter.dart   
+│   │   │   ├── slack_reporter.dart      # NEW: Slack notifications
+│   │   │   ├── email_reporter.dart      # NEW: Email reports
+│   │   │   └── dashboard_reporter.dart  # NEW: Real-time dashboard
+│   │   ├── screenshot_capturer.dart     
+│   │   ├── video_recorder.dart          
+│   │   ├── test_recorder.dart           # NEW: Record test session
+│   │   └── analytics/
+│   │       ├── test_analytics.dart      # NEW: Test metrics
+│   │       ├── flaky_test_detector.dart # NEW: Detect flaky tests
+│   │       └── cost_calculator.dart     # NEW: Calculate test costs
+│   │
+│   ├── ai/
+│   │   ├── test_healer.dart             # NEW: Auto-fix flaky tests
+│   │   ├── failure_analyzer.dart        # NEW: AI failure analysis
+│   │   └── suggestion_engine.dart       # NEW: Improvement suggestions
+│   │
+│   ├── monitoring/
+│   │   ├── metrics_collector.dart       # NEW: Collect metrics
+│   │   ├── performance_monitor.dart     # NEW: Monitor performance
+│   │   ├── sla_tracker.dart             # NEW: Track SLAs
+│   │   └── alert_manager.dart           # NEW: Alert on failures
+│   │
+│   ├── storage/
+│   │   ├── local_storage.dart           # NEW: SQLite storage
+│   │   ├── cloud_storage.dart           # NEW: S3/GCS storage
+│   │   ├── cache_storage.dart           # NEW: Redis cache
+│   │   └── artifact_manager.dart        # NEW: Manage artifacts
+│   │
+│   ├── bootstrap/
+│   │   ├── test_bootstrap_injector.dart 
+│   │   └── driver_generator.dart        
+│   │
+│   ├── interactive/
+│   │   ├── debugger.dart                # NEW: Interactive debugger
+│   │   ├── repl.dart                    # NEW: Test REPL
+│   │   └── breakpoint_manager.dart      # NEW: Manage breakpoints
+│   │
+│   └── utils/
+│       ├── file_utils.dart              
+│       ├── process_utils.dart           
+│       ├── validation_utils.dart        
+│       ├── git_utils.dart               # NEW: Git integration
+│       └── network_utils.dart           # NEW: Network helpers
+│
+├── native_assets/
+│   ├── android/
+│   │   ├── NativeWatcher.java           
+│   │   ├── build.gradle                 
+│   │   └── AndroidManifest.xml          
+│   └── ios/
+│       ├── NativeWatcher.swift          # NEW: iOS watcher
+│       └── Package.swift                # NEW: Swift package
+│
+├── plugins/                              # NEW: Plugin system
+│   ├── slack_notifier/
+│   ├── jira_integration/
+│   ├── custom_reporter/
+│   └── README_PLUGIN_DEV.md
+│
+├── dashboard/                            # NEW: Real-time dashboard
+│   ├── lib/
+│   │   ├── main.dart                    # Flutter web dashboard
+│   │   └── pages/
+│   ├── pubspec.yaml
+│   └── README.md
+│
+├── server/                               # NEW: Optional server
+│   ├── lib/
+│   │   ├── server.dart                  # WebSocket server
+│   │   ├── routes/
+│   │   └── services/
+│   └── pubspec.yaml
+│
+├── templates/
+│   ├── test_driver/
+│   ├── config/
+│   ├── test/
+│   └── plugins/                          # NEW: Plugin templates
+│
+├── test/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+│
+├── docs/
+│   ├── architecture.md
+│   ├── plugin_development.md            # NEW
+│   ├── cloud_integration.md             # NEW
+│   ├── troubleshooting.md
+│   └── api_reference.md                 # NEW
+│
+├── pubspec.yaml
+├── CLI_IMPLEMENTATION_PLAN_V2.md        # This file
+└── README.md
+```
+
+---
+
+## 📅 **Enhanced Implementation Timeline - 10 Weeks**
+
+---
+
+## **Phase 1: Core Foundation (Week 1-2)** ✅
+
+**Same as v1.0 but with additions:**
+
+### **Milestone 1.6: Caching Layer (Days 13-14)** 🆕
+
+**Tasks:**
+- [ ] Implement SQLite for local test results
+- [ ] Add Redis-compatible in-memory cache
+- [ ] Cache APK builds to avoid rebuilds
+- [ ] Cache test artifacts (screenshots, logs)
+
+**Code Example:**
+```dart
+// lib/core/cache/test_cache.dart
+class TestCache {
+  static final instance = TestCache._();
+  final _db = sqlite3.open('test_pilot.db');
+  
+  Future<TestResult?> getCachedResult(String testHash) async {
+    final result = _db.select(
+      'SELECT * FROM test_results WHERE test_hash = ?',
+      [testHash],
+    );
+    return result.isNotEmpty ? TestResult.fromJson(result.first) : null;
+  }
+  
+  Future<void> cacheResult(String testHash, TestResult result) async {
+    await _db.execute(
+      'INSERT OR REPLACE INTO test_results (test_hash, data, timestamp) VALUES (?, ?, ?)',
+      [testHash, jsonEncode(result), DateTime.now().toIso8601String()],
+    );
+  }
+  
+  // Smart cache invalidation
+  Future<void> invalidateIfChanged(String testFile) async {
+    final currentHash = await _computeFileHash(testFile);
+    final cachedHash = await _getCachedHash(testFile);
+    
+    if (currentHash != cachedHash) {
+      await _invalidate(testFile);
+    }
+  }
+}
+```
+
+**Deliverable:**
+```bash
+flutter_test_pilot run integration_test/login_test.dart
+
+# Output:
+# ⚡ Using cached result (test unchanged)
+# ✅ Test passed (0.3s) - 40x faster!
+```
+
+---
+
+## **Phase 2: Native + Cloud Integration (Week 3-4)** 🔥
+
+### **Milestone 2.5: Cloud Device Farm Integration (Days 22-26)** 🆕
+
+**Tasks:**
+- [ ] Implement BrowserStack provider
+- [ ] Implement AWS Device Farm provider
+- [ ] Implement Firebase Test Lab provider
+- [ ] Add device selection UI
+- [ ] Support parallel execution on cloud
+
+**Code Example:**
+```dart
+// lib/device/cloud/browserstack_provider.dart
+class BrowserStackProvider implements CloudProvider {
+  Future<List<DeviceInfo>> getAvailableDevices() async {
+    final response = await http.get(
+      'https://api.browserstack.com/app-automate/devices.json',
+      headers: {'Authorization': 'Basic $credentials'},
+    );
+    return _parseDevices(response);
+  }
+  
+  Future<String> uploadApp(File appFile) async {
+    final response = await http.post(
+      'https://api.browserstack.com/app-automate/upload',
+      body: await appFile.readAsBytes(),
+    );
+    return jsonDecode(response.body)['app_url'];
+  }
+  
+  Future<void> runTest(String appUrl, String testFile, String device) async {
+    await http.post(
+      'https://api.browserstack.com/app-automate/espresso/v2/build',
+      body: jsonEncode({
+        'app': appUrl,
+        'testSuite': await _uploadTestSuite(testFile),
+        'devices': [device],
+      }),
+    );
+  }
+}
+```
+
+**Deliverable:**
+```bash
+flutter_test_pilot run integration_test/ \
+  --cloud=browserstack \
+  --devices="iPhone 14,Samsung Galaxy S23,Pixel 7" \
+  --parallel=3
+
+# Output:
+# ☁️  Using BrowserStack
+# 📤 Uploading app... (15MB)
+# 🔍 Found 3 devices:
+#   • iPhone 14 (iOS 17)
+#   • Samsung Galaxy S23 (Android 13)
+#   • Pixel 7 (Android 14)
+# 🚀 Running 10 tests on 3 devices in parallel...
+# [iPhone 14] ✅ 8/10 passed
+# [Galaxy S23] ✅ 9/10 passed
+# [Pixel 7] ✅ 10/10 passed
+```
+
+### **Milestone 2.6: iOS Native Handling (Days 27-28)** 🆕
+
+**Tasks:**
+- [ ] Implement iOS XCTest watcher
+- [ ] Add permission granting via `xcrun`
+- [ ] Support iOS system dialogs
+- [ ] Integrate with Xcode simulator
+
+**Code Example:**
+```swift
+// native_assets/ios/NativeWatcher.swift
+import XCTest
+
+class NativeWatcher: XCTestCase {
+  func testWatchDialogs() {
+    let app = XCUIApplication()
+    app.launch()
+    
+    // Monitor for system alerts
+    addUIInterruptionMonitor(withDescription: "Location Permission") { alert in
+      if alert.buttons["Allow While Using App"].exists {
+        alert.buttons["Allow While Using App"].tap()
+        return true
+      }
+      return false
+    }
+    
+    addUIInterruptionMonitor(withDescription: "Notification Permission") { alert in
+      if alert.buttons["Allow"].exists {
+        alert.buttons["Allow"].tap()
+        return true
+      }
+      return false
+    }
+    
+    // Keep running
+    RunLoop.current.run()
+  }
+}
+```
+
+---
+
+## **Phase 3: Advanced Features (Week 5-6)** 🚀
+
+### **Milestone 3.5: Test Sharding (Days 31-33)** 🆕
+
+**Tasks:**
+- [ ] Implement intelligent test sharding
+- [ ] Balance shards by execution time
+- [ ] Support manual shard configuration
+- [ ] Merge shard results
+
+**Code Example:**
+```dart
+// lib/executor/test_sharding.dart
+class TestSharding {
+  List<TestShard> createShards(
+    List<TestFile> tests,
+    int shardCount, {
+    ShardStrategy strategy = ShardStrategy.balanced,
+  }) {
+    switch (strategy) {
+      case ShardStrategy.balanced:
+        return _balanceByExecutionTime(tests, shardCount);
+      case ShardStrategy.roundRobin:
+        return _roundRobin(tests, shardCount);
+      case ShardStrategy.byPackage:
+        return _groupByPackage(tests, shardCount);
+    }
+  }
+  
+  List<TestShard> _balanceByExecutionTime(
+    List<TestFile> tests,
+    int shardCount,
+  ) {
+    // Get historical execution times from cache
+    final timings = await _cache.getExecutionTimings(tests);
+    
+    // Use greedy algorithm to balance
+    final shards = List.generate(shardCount, (_) => TestShard([]));
+    tests.sort((a, b) => timings[b]!.compareTo(timings[a]!));
+    
+    for (final test in tests) {
+      final lightestShard = shards.reduce((a, b) =>
+        a.totalDuration < b.totalDuration ? a : b
+      );
+      lightestShard.add(test);
+    }
+    
+    return shards;
+  }
+}
+```
+
+**Deliverable:**
+```bash
+flutter_test_pilot run integration_test/ \
+  --shard-count=4 \
+  --shard-strategy=balanced
+
+# Output:
+# 🧩 Creating 4 shards (balanced by execution time)...
+# Shard 1: 8 tests (~45s)
+# Shard 2: 9 tests (~46s)
+# Shard 3: 7 tests (~44s)
+# Shard 4: 6 tests (~43s)
+# 
+# 🚀 Running shards in parallel...
+# ✅ All shards completed in 48s (vs 178s sequential)
+```
+
+### **Milestone 3.6: Smart Test Selection (Days 34-36)** 🆕
+
+**Tasks:**
+- [ ] Analyze code changes via Git
+- [ ] Map files to tests
+- [ ] Only run affected tests
+- [ ] Cache dependency graph
+
+**Code Example:**
+```dart
+// lib/executor/smart_test_selection.dart
+class SmartTestSelection {
+  Future<List<TestFile>> getAffectedTests() async {
+    // Get changed files from Git
+    final changedFiles = await _git.getChangedFiles();
+    
+    // Build dependency graph (cached)
+    final depGraph = await _buildDependencyGraph();
+    
+    // Find tests that depend on changed files
+    final affectedTests = <TestFile>{};
+    
+    for (final file in changedFiles) {
+      final tests = depGraph.getTestsFor(file);
+      affectedTests.addAll(tests);
+    }
+    
+    return affectedTests.toList();
+  }
+  
+  Future<DependencyGraph> _buildDependencyGraph() async {
+    final cached = await _cache.getDependencyGraph();
+    if (cached != null && !cached.isStale) return cached;
+    
+    // Rebuild graph
+    final graph = DependencyGraph();
+    final allTests = await _finder.findAllTests();
+    
+    for (final test in allTests) {
+      final imports = await _parser.getImports(test);
+      graph.addTest(test, imports);
+    }
+    
+    await _cache.saveDependencyGraph(graph);
+    return graph;
+  }
+}
+```
+
+**Deliverable:**
+```bash
+flutter_test_pilot run integration_test/ --smart
+
+# Output:
+# 🔍 Analyzing changed files...
+#   • lib/services/auth_service.dart
+#   • lib/models/user.dart
+# 
+# 🧠 Smart selection: 3 affected tests (vs 30 total)
+#   ✓ integration_test/login_test.dart
+#   ✓ integration_test/profile_test.dart
+#   ✓ integration_test/logout_test.dart
+# 
+# ⚡ Running only affected tests...
+# ✅ 3/3 passed in 15s (85% time saved)
+```
+
+### **Milestone 3.7: Interactive Debugger (Days 37-38)** 🆕
+
+**Tasks:**
+- [ ] Implement REPL for tests
+- [ ] Add breakpoint support
+- [ ] Step-by-step execution
+- [ ] Inspect widget tree
+
+**Code Example:**
+```dart
+// lib/interactive/debugger.dart
+class InteractiveDebugger {
+  Future<void> startDebugSession(String testFile) async {
+    print('🐛 Starting interactive debug session...');
+    print('Commands: (s)tep, (c)ontinue, (i)nspect, (b)reakpoint, (q)uit');
+    
+    final test = await _loader.loadTest(testFile);
+    final executor = DebugExecutor(test);
+    
+    while (true) {
+      final command = stdin.readLineSync();
+      
+      switch (command) {
+        case 's':
+          await executor.stepForward();
+          _printCurrentState(executor);
+          break;
+        case 'c':
+          await executor.continueExecution();
+          break;
+        case 'i':
+          _inspectWidgetTree(executor.currentContext);
+          break;
+        case 'b':
+          _setBreakpoint();
+          break;
+        case 'q':
+          return;
+      }
+    }
+  }
+}
+```
+
+**Deliverable:**
+```bash
+flutter_test_pilot debug integration_test/login_test.dart
+
+# Output:
+# 🐛 Interactive Debug Mode
+# > Breakpoint at line 45
+# > (s)tep | (c)ontinue | (i)nspect | (q)uit
+# 
+# s
+# ▶ Executing: await tester.tap(find.text('Login'))
+# ✓ Tapped 'Login' button
+# 
+# i
+# 📊 Widget Tree:
+#   MaterialApp
+#   └── Scaffold
+#       └── LoginScreen
+#           ├── TextField (email)
+#           ├── TextField (password)
+#           └── ElevatedButton (Login)
+```
+
+---
+
+## **Phase 4: AI & Analytics (Week 7)** 🤖
+
+### **Milestone 4.6: AI Test Healer (Days 39-41)** 🆕
+
+**Tasks:**
+- [ ] Detect flaky tests automatically
+- [ ] Analyze failure patterns
+- [ ] Suggest fixes using AI
+- [ ] Auto-apply safe fixes
+
+**Code Example:**
+```dart
+// lib/ai/test_healer.dart
+class TestHealer {
+  Future<void> healFlakyTest(TestFile test) async {
+    // Run test multiple times to confirm flakiness
+    final results = await _runMultipleTimes(test, times: 10);
+    
+    if (!_isFlaky(results)) return;
+    
+    // Analyze failure patterns
+    final failures = results.where((r) => !r.passed);
+    final commonPattern = _analyzeFailures(failures);
+    
+    // Generate fix suggestions
+    final suggestions = await _aiEngine.suggestFixes(commonPattern);
+    
+    print('🤖 AI-detected flaky test: ${test.name}');
+    print('📊 Flakiness rate: ${_calculateFlakiness(results)}%');
+    print('💡 Suggestions:');
+    
+    for (final suggestion in suggestions) {
+      print('  ${suggestion.confidence}% - ${suggestion.description}');
+      
+      if (suggestion.autoApplicable && suggestion.confidence > 90) {
+        print('  ✅ Auto-applying fix...');
+        await _applyFix(test, suggestion);
+      }
+    }
+  }
+  
+  Future<List<FixSuggestion>> _suggestFixes(FailurePattern pattern) async {
+    // Common flaky test patterns
+    if (pattern.type == FailureType.timing) {
+      return [
+        FixSuggestion(
+          description: 'Add pumpAndSettle with timeout',
+          confidence: 95,
+          fix: 'await tester.pumpAndSettle(timeout: Duration(seconds: 5));',
+          autoApplicable: true,
+        ),
+      ];
+    }
+    
+    if (pattern.type == FailureType.nativeDialog) {
+      return [
+        FixSuggestion(
+          description: 'Enable native watcher for this test',
+          confidence: 98,
+          fix: '@Tags(["native-handler"])',
+          autoApplicable: true,
+        ),
+      ];
+    }
+    
+    // Use AI for complex patterns
+    return await _openAIAnalyzer.analyze(pattern);
+  }
+}
+```
+
+**Deliverable:**
+```bash
+flutter_test_pilot heal integration_test/
+
+# Output:
+# 🔍 Analyzing test suite for flaky tests...
+# 📊 Running statistical analysis (10 iterations per test)...
+# 
+# 🤖 Found 3 flaky tests:
+# 
+# 1. payment_test.dart (40% failure rate)
+#    💡 95% confidence: Add timeout to pumpAndSettle
+#    ✅ Auto-applied fix
+#    
+# 2. profile_test.dart (25% failure rate)
+#    💡 88% confidence: Native dialog causing flakiness
+#    ✅ Enabled native watcher
+#    
+# 3. upload_test.dart (15% failure rate)
+#    💡 72% confidence: Network timing issue
+#    ⚠️  Manual review required
+# 
+# ✅ Healed 2/3 flaky tests automatically
+```
+
+### **Milestone 4.7: Test Analytics Dashboard (Days 42-43)** 🆕
+
+**Tasks:**
+- [ ] Build Flutter web dashboard
+- [ ] WebSocket real-time updates
+- [ ] Interactive charts
+- [ ] Historical trends
+
+**Code Example:**
+```dart
+// dashboard/lib/main.dart
+class TestDashboard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: DashboardPage(),
+    );
+  }
+}
+
+class DashboardPage extends StatefulWidget {
+  @override
+  _DashboardPageState createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  late WebSocketChannel _channel;
+  List<TestResult> _liveResults = [];
+  
+  @override
+  void initState() {
+    super.initState();
+    _channel = WebSocketChannel.connect(
+      Uri.parse('ws://localhost:8080/test-events'),
+    );
+    
+    _channel.stream.listen((event) {
+      setState(() {
+        _liveResults.add(TestResult.fromJson(jsonDecode(event)));
+      });
+    });
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Test Pilot Dashboard')),
+      body: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: _buildLiveResults(),
+          ),
+          Expanded(
+            flex: 1,
+            child: _buildMetrics(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+**Deliverable:**
+```bash
+flutter_test_pilot dashboard
+
+# Opens browser at http://localhost:3000
+# 
+# Dashboard shows:
+# ┌─────────────────────────────────────────────────────────┐
+# │ 🚀 Test Pilot Dashboard - Live                        │
+# ├─────────────────────────────────────────────────────────┤
+# │ Tests Running: 12/30                                    │
+# │ Passed: 8 | Failed: 1 | Running: 3                     │
+# │ ETA: 2m 15s                                            │
+# │                                                         │
+# │ Live Feed:                                             │
+# │ ✅ login_test.dart (12.3s)                            │
+# │ ✅ signup_test.dart (15.1s)                           │
+# │ ❌ payment_test.dart (20.4s) - Network timeout        │
+# │ 🔄 profile_test.dart (running...)                     │
+# │                                                         │
+# │ [Interactive Chart: Pass Rate Over Time]               │
+# │ [Interactive Chart: Execution Time Trends]             │
+# └─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## **Phase 5: Enterprise Features (Week 8-9)** 💼
+
+### **Milestone 5.1: Plugin System (Days 44-47)** 🆕
+
+**Tasks:**
+- [ ] Define plugin interface
+- [ ] Implement plugin loader
+- [ ] Create plugin marketplace (CLI)
+- [ ] Build sample plugins
+
+**Code Example:**
+```dart
+// lib/core/plugin/plugin_interface.dart
+abstract class TestPilotPlugin {
+  String get name;
+  String get version;
+  String get description;
+  
+  // Lifecycle hooks
+  Future<void> onBeforeTestSuite(TestSuiteContext context);
+  Future<void> onAfterTest(TestContext context, TestResult result);
+  Future<void> onFailure(TestContext context, Exception error);
+  Future<void> onComplete(TestSuiteResult results);
+  
+  // Custom commands
+  Map<String, CommandHandler>? get customCommands => null;
+}
+
+// Example plugin
+class SlackNotifierPlugin extends TestPilotPlugin {
+  @override
+  String get name => 'slack-notifier';
+  
+  @override
+  Future<void> onFailure(TestContext context, Exception error) async {
+    await http.post(
+      slackWebhookUrl,
+      body: jsonEncode({
+        'text': '❌ Test failed: ${context.testName}\nError: $error',
+      }),
+    );
+  }
+  
+  @override
+  Future<void> onComplete(TestSuiteResult results) async {
+    final message = '''
+    🧪 Test Suite Complete
+    ✅ Passed: ${results.passedCount}
+    ❌ Failed: ${results.failedCount}
+    ⏱️ Duration: ${results.duration}
+    ''';
+    
+    await http.post(slackWebhookUrl, body: jsonEncode({'text': message}));
+  }
+}
+```
+
+**Deliverable:**
+```bash
+# Install plugin
+flutter_test_pilot plugin install slack-notifier
+
+# List plugins
+flutter_test_pilot plugin list
+# Output:
+# 📦 Installed Plugins:
+#   • slack-notifier v1.0.0
+#   • jira-integration v2.1.0
+#   • custom-reporter v1.5.0
+
+# Use plugin
+flutter_test_pilot run integration_test/ --plugin=slack-notifier
+
+# Output:
+# 🚀 Running with plugins: slack-notifier
+# 🧪 Running tests...
+# [Slack] 📤 Sending notification to #test-results...
+# ✅ 28/30 passed
+# [Slack] ✅ Notification sent
+```
+
+### **Milestone 5.2: Cost Tracking (Days 48-50)** 🆕
+
+**Tasks:**
+- [ ] Track device usage time
+- [ ] Calculate cloud provider costs
+- [ ] Generate cost reports
+- [ ] Set budget alerts
+
+**Code Example:**
+```dart
+// lib/monitoring/cost_calculator.dart
+class CostCalculator {
+  static const deviceCosts = {
+    'browserstack': 0.05, // per minute
+    'aws_device_farm': 0.17, // per device minute
+    'firebase_test_lab': 0.10, // per minute
+    'local': 0.0,
+  };
+  
+  Future<CostReport> calculateCosts(TestSuiteResult results) async {
+    final report = CostReport();
+    
+    for (final result in results.tests) {
+      final provider = result.device.provider;
+      final duration = result.duration.inMinutes;
+      final cost = (deviceCosts[provider] ?? 0.0) * duration;
+      
+      report.addCost(provider, cost, duration);
+    }
+    
+    return report;
+  }
+  
+  Future<void> checkBudget(CostReport report) async {
+    final monthlyBudget = await _config.getMonthlyBudget();
+    final currentSpend = await _storage.getMonthlySpend();
+    
+    if (currentSpend + report.totalCost > monthlyBudget) {
+      await _alertManager.sendAlert(
+        'Budget Alert',
+        'Test execution will exceed monthly budget!',
+      );
+    }
+  }
+}
+```
+
+**Deliverable:**
+```bash
+flutter_test_pilot run integration_test/ --cloud=browserstack
+
+# Output:
+# ☁️  Using BrowserStack
+# 🚀 Running 30 tests on 3 devices...
+# ✅ 28/30 passed
+# 
+# 💰 Cost Summary:
+#   Device time: 45 minutes
+#   Cost: $2.25 (BrowserStack)
+#   Monthly spend: $127.50 / $200.00
+#   
+# ⚠️  Warning: 64% of monthly budget used
+```
+
+### **Milestone 5.3: Test Replay (Days 51-52)** 🆕
+
+**Tasks:**
+- [ ] Record test execution
+- [ ] Capture all inputs/outputs
+- [ ] Replay recorded sessions
+- [ ] Debug with replay
+
+**Code Example:**
+```dart
+// lib/reporting/test_recorder.dart
+class TestRecorder {
+  final _events = <TestEvent>[];
+  
+  Future<void> record(TestContext context) async {
+    // Record every interaction
+    context.onTap((finder) {
+      _events.add(TapEvent(
+        timestamp: DateTime.now(),
+        finder: finder.toString(),
+        screenshot: _captureScreenshot(),
+      ));
+    });
+    
+    context.onPump((duration) {
+      _events.add(PumpEvent(
+        timestamp: DateTime.now(),
+        duration: duration,
+      ));
+    });
+    
+    context.onAssertion((assertion, result) {
+      _events.add(AssertionEvent(
+        timestamp: DateTime.now(),
+        assertion: assertion,
+        result: result,
+      ));
+    });
+  }
+  
+  Future<void> saveRecording(String testName) async {
+    final recording = TestRecording(
+      testName: testName,
+      events: _events,
+      metadata: _metadata,
+    );
+    
+    await _storage.saveRecording(recording);
+  }
+}
+
+class TestReplayer {
+  Future<void> replay(String recordingId) async {
+    final recording = await _storage.loadRecording(recordingId);
+    
+    print('▶️  Replaying: ${recording.testName}');
+    print('📅 Recorded: ${recording.timestamp}');
+    print('⏱️  Duration: ${recording.duration}');
+    
+    for (final event in recording.events) {
+      await _replayEvent(event);
+      await Future.delayed(Duration(milliseconds: 100)); // Slow motion
+    }
+  }
+}
+```
+
+**Deliverable:**
+```bash
+# Record a test
+flutter_test_pilot run integration_test/login_test.dart --record
+
+# Output:
+# 🎬 Recording test execution...
+# ✅ Test passed
+# 💾 Recording saved: login_test_2026-01-19_10-23-15.rec
+
+# List recordings
+flutter_test_pilot replay list
+# Output:
+# 📼 Available Recordings:
+#   1. login_test_2026-01-19_10-23-15.rec (12.3s)
+#   2. payment_test_2026-01-19_09-15-42.rec (FAILED, 20.4s)
+
+# Replay a recording
+flutter_test_pilot replay login_test_2026-01-19_10-23-15
+
+# Output:
+# ▶️  Replaying: login_test (recorded Jan 19, 2026 10:23 AM)
+# ⏱️  Event 1/45: Tap 'Email' field
+# [Screenshot shown]
+# ⏱️  Event 2/45: Enter text 'test@example.com'
+# ...
+```
+
+---
+
+## **Phase 6: Production Polish (Week 10)** ✨
+
+### **Milestone 6.1: Autocomplete & Shell Integration (Days 53-55)** 🆕
+
+**Tasks:**
+- [ ] Generate shell completion scripts
+- [ ] Support bash, zsh, fish
+- [ ] Add command hints
+- [ ] Tab completion for flags
+
+**Deliverable:**
+```bash
+# Setup autocomplete
+flutter_test_pilot completion install
+
+# Now you can use tab completion:
+flutter_test_pilot run <TAB>
+# Shows: integration_test/ test/ ...
+
+flutter_test_pilot run --<TAB>
+# Shows: --device --cloud --parallel --retry ...
+```
+
+### **Milestone 6.2: Configuration Wizard (Days 56-57)** 🆕
+
+**Tasks:**
+- [ ] Interactive setup experience
+- [ ] Detect environment automatically
+- [ ] Guide through configuration
+- [ ] Validate settings
+
+**Deliverable:**
+```bash
+flutter_test_pilot init --wizard
+
+# Output:
+# 🧙 Flutter Test Pilot Setup Wizard
+# 
+# Step 1/5: Detect Environment
+# ✅ Flutter SDK: 3.16.0
+# ✅ ADB: 34.0.5
+# ✅ Java: 17.0.9
+# 
+# Step 2/5: Select Test Framework
+#   1. Integration Tests (flutter_test)
+#   2. E2E Tests (flutter_driver)
+#   3. Both
+# > 1
+# 
+# Step 3/5: Device Configuration
+#   Run tests on:
+#   1. Local devices only
+#   2. Cloud devices (BrowserStack, AWS, Firebase)
+#   3. Both
+# > 2
+# 
+# Step 4/5: Cloud Provider Setup
+#   Select cloud provider:
+#   1. BrowserStack
+#   2. AWS Device Farm
+#   3. Firebase Test Lab
+# > 1
+# 
+#   Enter BrowserStack credentials:
+#   Username: user@example.com
+#   Access Key: ********
+#   ✅ Credentials validated
+# 
+# Step 5/5: Native Handling
+#   Enable automatic native dialog handling?
+#   [Y/n]: y
+#   ✅ Enabled
+# 
+# 🎉 Configuration complete!
+# ✅ Created: .testpilot.yaml
+# ✅ Created: integration_test/example_test.dart
+# 
+# 🚀 Try it out:
+#   flutter_test_pilot run integration_test/example_test.dart
+```
+
+### **Milestone 6.3: Comprehensive Documentation (Days 58-60)** 🆕
+
+**Tasks:**
+- [ ] API documentation
+- [ ] Plugin development guide
+- [ ] Troubleshooting guide
+- [ ] Video tutorials
+- [ ] Migration guide from v1.0
+
+---
+
+## 🎯 **New Commands Summary**
+
+```bash
+# Basic (v1.0)
+flutter_test_pilot run <test>
+flutter_test_pilot devices
+flutter_test_pilot doctor
+flutter_test_pilot init
+
+# New in v2.0
+flutter_test_pilot dashboard              # Real-time dashboard
+flutter_test_pilot replay <recording>     # Replay test session
+flutter_test_pilot debug <test>           # Interactive debugger
+flutter_test_pilot heal <test>            # AI-powered test healing
+flutter_test_pilot shard <tests>          # Create test shards
+flutter_test_pilot plugin <command>       # Plugin management
+flutter_test_pilot completion install     # Shell autocomplete
+flutter_test_pilot cost report            # Cost analysis
+flutter_test_pilot init --wizard          # Interactive setup
+```
+
+---
+
+## 📊 **Improvements Over v1.0**
+
+| Feature | v1.0 | v2.0 | Improvement |
+|---------|------|------|-------------|
+| **Test Execution** | Sequential | Parallel + Sharded | 10x faster |
+| **Native Handling** | Android only | Android + iOS | Cross-platform |
+| **Device Support** | Local only | Local + 3 Cloud Providers | Unlimited scale |
+| **Caching** | None | Multi-layer cache | 40x faster re-runs |
+| **Test Selection** | Run all | Smart selection | 85% time saved |
+| **Debugging** | Logs only | Interactive debugger | 5x faster debug |
+| **Flaky Tests** | Manual fix | AI auto-heal | 90% auto-fixed |
+| **Monitoring** | Basic reports | Real-time dashboard | Live visibility |
+| **Extensibility** | None | Plugin system | Unlimited customization |
+| **Cost Tracking** | None | Full cost analysis | Budget control |
+
+---
+
+## 💰 **Estimated Effort**
+
+| Phase | Duration | Complexity | Priority |
+|-------|----------|------------|----------|
+| Phase 1: Foundation | 2 weeks | Medium | **High** |
+| Phase 2: Native + Cloud | 2 weeks | High | **High** |
+| Phase 3: Advanced Features | 2 weeks | Medium | **High** |
+| Phase 4: AI & Analytics | 1 week | High | Medium |
+| Phase 5: Enterprise | 2 weeks | Medium | Medium |
+| Phase 6: Polish | 1 week | Low | Low |
+| **Total** | **10 weeks** | **Medium-High** | - |
+
+---
+
+## 🎉 **Success Metrics for v2.0**
+
+### **Performance:**
+- ✅ **Test execution 10x faster** with sharding + parallelization
+- ✅ **Re-runs 40x faster** with caching
+- ✅ **85% fewer tests run** with smart selection
+- ✅ **Bundle size < 20MB** (optimized)
+
+### **Reliability:**
+- ✅ **99% test pass rate** with AI healing
+- ✅ **Zero manual intervention** with native handlers
+- ✅ **< 1% flaky tests** after healing
+- ✅ **100% iOS + Android support**
+
+### **Developer Experience:**
+- ✅ **5-minute setup** with wizard
+- ✅ **Real-time feedback** with dashboard
+- ✅ **5x faster debugging** with interactive mode
+- ✅ **Unlimited extensibility** with plugins
+
+### **Enterprise:**
+- ✅ **Cost tracking** and budget alerts
+- ✅ **Audit logs** for compliance
+- ✅ **Multi-cloud** support (3+ providers)
+- ✅ **SLA monitoring** and alerts
+
+---
+
+## 🚀 **Quick Start (Week 1)**
+
+### **Day 1-2:**
+- [ ] Add caching layer (SQLite + in-memory)
+- [ ] Test cache hit/miss rates
+
+### **Day 3-4:**
+- [ ] Implement plugin system foundation
+- [ ] Create sample Slack plugin
+
+### **Day 5-7:**
+- [ ] Build basic dashboard (Flutter web)
+- [ ] WebSocket real-time updates
+
+**Goal:** By end of Week 1, have caching + dashboard working!
+
+---
+
+## 📞 **Contact**
+
+**Project:** Flutter Test Pilot CLI v2.0  
+**Status:** Enhanced Planning Complete  
+**Next:** Begin Phase 1 implementation  
+
+---
+
+**Ready to build the most advanced Flutter testing CLI! 🚀**

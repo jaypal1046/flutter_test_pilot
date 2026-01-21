@@ -1,3 +1,4 @@
+import 'dart:io'; // Add this import at the top
 import '../../step_result.dart';
 import '../../test_action.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +8,63 @@ class Type extends TestAction {
   final String fieldIdentifier;
   final String textToType;
   final bool clear;
+  final bool manualInput; // NEW: Flag for manual input mode
+  final String? manualInputPrompt; // NEW: Custom prompt for manual input
 
-  Type._(this.fieldIdentifier, this.textToType, {this.clear = true});
+  Type._(
+    this.fieldIdentifier,
+    this.textToType, {
+    this.clear = true,
+    this.manualInput = false,
+    this.manualInputPrompt,
+  });
 
   /// Type into a field identified by key, hint text, label, or placeholder
   static _TypeBuilder into(String fieldIdentifier) {
     return _TypeBuilder(fieldIdentifier);
   }
+
+  /// Find text field by hint text
+  static _TypeBuilder hint(String hintText) => _TypeBuilder(hintText);
+
+  /// Find text field by label text
+  static _TypeBuilder label(String labelText) => _TypeBuilder(labelText);
+
+  /// Find text field by key
+  static _TypeBuilder key(String keyValue) => _TypeBuilder(keyValue);
+
+  /// Find text field by semantic label
+  static _TypeBuilder semantic(String semanticLabel) =>
+      _TypeBuilder(semanticLabel);
+
+  /// Find text field by index (0-based)
+  static _TypeBuilder index(int index) => _TypeBuilder('index:$index');
+
+  /// Find text field by test ID (prefixed automatically)
+  static _TypeBuilder testId(String testId) => _TypeBuilder('testId:$testId');
+
+  /// Find text field by controller reference
+  static _TypeBuilder controller(String controllerInfo) =>
+      _TypeBuilder('controller:$controllerInfo');
+
+  /// Find text field by focus node debug label
+  static _TypeBuilder focus(String focusLabel) =>
+      _TypeBuilder('focus:$focusLabel');
+
+  /// Find text field by parent widget information
+  static _TypeBuilder parent(String parentInfo) =>
+      _TypeBuilder('parent:$parentInfo');
+
+  /// Find text field containing specific text content
+  static _TypeBuilder content(String textContent) => _TypeBuilder(textContent);
+
+  /// Find Cupertino text field by placeholder
+  static _TypeBuilder placeholder(String placeholderText) =>
+      _TypeBuilder(placeholderText);
+
+  /// Find text field by position relative to other elements
+  static _TypeBuilder position(String positionInfo) =>
+      _TypeBuilder('position:$positionInfo');
 
   @override
   Future<StepResult> execute(WidgetTester tester) async {
@@ -40,6 +91,11 @@ class Type extends TestAction {
         );
       }
 
+      // NEW: Manual input mode
+      if (manualInput) {
+        return await _handleManualInput(tester, finder, stopwatch);
+      }
+
       // Clear or append text
       if (clear) {
         await tester.enterText(finder, textToType);
@@ -64,6 +120,55 @@ class Type extends TestAction {
         duration: stopwatch.elapsed,
       );
     }
+  }
+
+  /// NEW: Handle manual input from user
+  Future<StepResult> _handleManualInput(
+    WidgetTester tester,
+    Finder finder,
+    Stopwatch stopwatch,
+  ) async {
+    print('\n' + '═' * 80);
+    print('⏸️  MANUAL INPUT REQUIRED');
+    print('═' * 80);
+    print('Field: "$fieldIdentifier"');
+    if (manualInputPrompt != null) {
+      print('Prompt: $manualInputPrompt');
+    } else {
+      print('Default value would be: "$textToType"');
+    }
+    print('');
+    print('📝 Please enter the value manually in the app now.');
+    print(
+      '   (For example: if OTP is rate-limited, use a different phone number)',
+    );
+    print('');
+    print(
+      'When you\'re done entering the value, press ENTER here to continue...',
+    );
+    print('═' * 80);
+
+    // Wait for user to press Enter
+    stdin.readLineSync();
+
+    // Pump to capture the manually entered value
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Get the value that was entered manually
+    final enteredValue = _getCurrentText(tester, finder);
+
+    print('\n✅ Continuing test...');
+    print(
+      'Captured value: "${enteredValue.isNotEmpty ? enteredValue : "(empty)"}"',
+    );
+    print('');
+
+    stopwatch.stop();
+    return StepResult.success(
+      message:
+          'Manual input completed for field "$fieldIdentifier". Value entered: "${enteredValue.isNotEmpty ? enteredValue : "(empty)"}"',
+      duration: stopwatch.elapsed,
+    );
   }
 
   /// Find text field using comprehensive strategies
@@ -701,6 +806,17 @@ class _TypeBuilder {
   /// Append text to existing content
   Type append(String text) {
     return Type._(fieldIdentifier, text, clear: false);
+  }
+
+  /// Enable manual input mode
+  Type manual({String? prompt}) {
+    return Type._(
+      fieldIdentifier,
+      '',
+      clear: false,
+      manualInput: true,
+      manualInputPrompt: prompt,
+    );
   }
 }
 

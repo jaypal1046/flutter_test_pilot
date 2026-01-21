@@ -1,0 +1,97 @@
+name: Flutter Test Pilot CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Run tests with Test Pilot
+        run: flutter test --reporter expanded
+      
+      - name: Generate Test Reports
+        if: always()
+        run: |
+          echo "Test reports generated in test-results/"
+          ls -la test-results/ || echo "No test results directory"
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            test-results/
+            coverage/
+          retention-days: 30
+      
+      - name: Upload HTML Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: html-report
+          path: test-results/*.html
+          retention-days: 30
+      
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const results = fs.readFileSync('test-results/test-execution-summary.json', 'utf8');
+              const data = JSON.parse(results);
+              const summary = data.testExecution.summary;
+              
+              const comment = `## 🚀 Flutter Test Pilot Results
+              
+              | Metric | Value |
+              |--------|-------|
+              | Total Tests | ${summary.totalTests} |
+              | ✅ Passed | ${summary.passed} |
+              | ❌ Failed | ${summary.failed} |
+              | ⏭️ Skipped | ${summary.skipped} |
+              | 📈 Success Rate | ${summary.successRate.toFixed(1)}% |
+              | ⏱️ Duration | ${(summary.duration.totalSeconds)}s |
+              
+              ${summary.failed > 0 ? '⚠️ Some tests failed. Check the artifacts for detailed reports.' : '✨ All tests passed!'}
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              console.log('Could not read test results:', error);
+            }
+      
+      - name: Fail if tests failed
+        if: always()
+        run: |
+          if [ -f test-results/test-execution-summary.json ]; then
+            EXIT_CODE=$(grep -oP '"failed":\s*\K\d+' test-results/test-execution-summary.json || echo "0")
+            if [ "$EXIT_CODE" != "0" ]; then
+              echo "Tests failed with $EXIT_CODE failures"
+              exit 1
+            fi
+          fi

@@ -40,7 +40,9 @@ class _WaitDuration extends WaitCondition {
     final stopwatch = Stopwatch()..start();
 
     await Future.delayed(duration);
-    await tester.pumpAndSettle();
+    // Use pump() instead of pumpAndSettle() to avoid hanging
+    // pumpAndSettle() can hang if there are ongoing animations or async operations
+    await tester.pump();
     stopwatch.stop();
 
     return StepResult.success(
