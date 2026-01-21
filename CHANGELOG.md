@@ -3,7 +3,14 @@
 All notable changes to Flutter Test Pilot will be documented in this file.  
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.8] - 2026-01-13
+## [2.0.0] - 2026-01-21
+
+### 🏗️ Major Project Restructuring & Cleanup
+
+- **Project Consolidation**: Merged nested `flutter_test_pilot` directory into root for a cleaner, standard Dart package structure.
+- **Library Organization**: Moved internal implementation files to `lib/src/`, exposing only the public API via `flutter_test_pilot.dart`.
+- **Example App Refactor**: Completely modularized the `example` app into separate page files (`home_page.dart`, `permissions_test_page.dart`, etc.) to demonstrate best practices and improved readability.
+- **Documentation**: Significant cleanup of redundant documentation files. Updated `README.md` and `walkthrough.md` to reflect the new structure.
 
 ### Enhanced
 

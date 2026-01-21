@@ -188,20 +188,14 @@ flutter_test_pilot run integration_test/app_test.dart \
 ```
 flutter_test_pilot/
 ├── lib/
-│   ├── cli/                    # CLI commands
-│   ├── core/                   # Core framework (cache, config, models)
-│   ├── native/                 # Native Android support
-│   │   ├── adb_commander.dart
-│   │   ├── permission_granter.dart
-│   │   ├── dialog_watcher.dart
-│   │   └── native_handler.dart
-│   ├── executor/               # Test execution
-│   │   ├── retry_handler.dart
-│   │   └── parallel_executor.dart
-│   ├── discovery/              # Test discovery
-│   │   └── test_finder.dart
-│   └── reporting/              # Screenshots & reports
-│       └── screenshot_capturer.dart
+│   ├── src/                    # Internal implementation
+│   │   ├── cli/                # CLI commands
+│   │   ├── core/               # Core framework (cache, config, models)
+│   │   ├── native/             # Native Android support
+│   │   ├── executor/           # Test execution
+│   │   ├── discovery/          # Test discovery
+│   │   └── reporting/          # Screenshots & reports
+│   └── flutter_test_pilot.dart # Main export file
 │
 ├── native_assets/
 │   └── android/                # Java UI Automator watcher
